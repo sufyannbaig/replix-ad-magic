@@ -670,6 +670,7 @@ function CreateAd() {
         headline: concept.headline,
         caption: concept.caption,
         cta: concept.cta,
+        ...(concept.overlay?.hero ? { overlay: concept.overlay } : {}),
         image: signedUrl,
         imagePath: path,
       };
