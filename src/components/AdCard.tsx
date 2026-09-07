@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Download, Instagram, Facebook, Pencil, RefreshCw, Star, Check } from "lucide-react";
+import {
+  Download,
+  Instagram,
+  Facebook,
+  Pencil,
+  RefreshCw,
+  Star,
+  Check,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { themes, type Ad, type Platform } from "@/data/studio";
 import { useStudio } from "@/lib/studio-store";
+import { downloadImage } from "@/lib/image-utils";
 import { cn } from "@/lib/utils";
 
 const themeLabel = (id: Ad["theme"]) => themes.find((t) => t.id === id)?.label ?? id;
@@ -76,7 +86,7 @@ export function AdCard({
   compact = false,
 }: {
   ad: Ad;
-  onRegenerate?: (ad: Ad) => void;
+  onRegenerate?: (ad: Ad) => void | Promise<void>;
   compact?: boolean;
 }) {
   const { toggleFavorite, updateAd } = useStudio();
@@ -87,13 +97,17 @@ export function AdCard({
   const [cta, setCta] = useState(ad.cta);
   const [regenerating, setRegenerating] = useState(false);
 
-  const handleRegenerate = () => {
+  const aspectClass =
+    ad.format === "9:16" ? "aspect-[9/16]" : ad.format === "4:5" ? "aspect-[4/5]" : "aspect-square";
+
+  const handleRegenerate = async () => {
     if (!onRegenerate) return;
     setRegenerating(true);
-    setTimeout(() => {
-      onRegenerate(ad);
+    try {
+      await onRegenerate(ad);
+    } finally {
       setRegenerating(false);
-    }, 1400);
+    }
   };
 
   const saveCopy = () => {
@@ -102,23 +116,40 @@ export function AdCard({
     toast.success("Copy updated");
   };
 
+  const handleDownload = async () => {
+    if (!ad.image) return;
+    try {
+      await downloadImage(ad.image, `${ad.productName.replace(/\s+/g, "-").toLowerCase()}-ad.png`);
+    } catch {
+      toast.error("Could not download that image.");
+    }
+  };
+
   return (
     <article className="group card-soft overflow-hidden transition-shadow hover:shadow-lift">
       <div className="relative">
-        <img
-          src={ad.image}
-          alt={ad.headline}
-          loading="lazy"
-          className={cn(
-            "w-full object-cover",
-            ad.format === "9:16"
-              ? "aspect-[9/16]"
-              : ad.format === "4:5"
-                ? "aspect-[4/5]"
-                : "aspect-square",
-            regenerating && "animate-pulse opacity-40",
-          )}
-        />
+        {ad.image ? (
+          <img
+            src={ad.image}
+            alt={ad.headline}
+            loading="lazy"
+            className={cn(
+              "w-full object-cover",
+              aspectClass,
+              regenerating && "animate-pulse opacity-40",
+            )}
+          />
+        ) : (
+          <div
+            className={cn(
+              "flex w-full animate-pulse flex-col items-center justify-center gap-2 bg-muted",
+              aspectClass,
+            )}
+          >
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">Painting the scene…</p>
+          </div>
+        )}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <Badge className="bg-navy/85 text-[0.65rem] text-navy-foreground hover:bg-navy">
             {ad.platform === "instagram" ? "Instagram" : "Facebook"}
@@ -200,7 +231,7 @@ export function AdCard({
               size="icon"
               variant="ghost"
               title="Regenerate"
-              onClick={handleRegenerate}
+              onClick={() => void handleRegenerate()}
               disabled={regenerating}
             >
               <RefreshCw className={cn("h-4 w-4", regenerating && "animate-spin")} />
@@ -218,7 +249,8 @@ export function AdCard({
             size="icon"
             variant="ghost"
             title="Download"
-            onClick={() => toast.success("Creative downloaded (demo)")}
+            disabled={!ad.image}
+            onClick={handleDownload}
           >
             <Download className="h-4 w-4" />
           </Button>

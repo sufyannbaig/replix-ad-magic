@@ -1,28 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, Lightbulb, Plus } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Loader2,
+  Sparkles,
+  Lightbulb,
+  Plus,
+  Upload,
+  Store,
+  AlertTriangle,
+  ImagePlus,
+} from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
 import { AdCardSkeleton } from "@/components/AdCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 
 import {
   formats,
-  generateConcepts,
-  generationSteps,
   objectives,
   products,
-  productById,
+  store,
   themes,
   understandingSteps,
   type Ad,
   type AdFormat,
   type ObjectiveId,
+  type Platform,
   type ThemeId,
 } from "@/data/studio";
+import { analyzeProductImage, generateAdCopy, renderAdImage, type ProductAnalysis } from "@/lib/ai.functions";
+import { saveAd } from "@/lib/ads-repo";
+import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +50,7 @@ export const Route = createFileRoute("/create")({
       {
         name: "description",
         content:
-          "A four-step ad builder: pick a product, let Replix study it, choose your angle, then generate a batch of creative concepts.",
+          "A four-step ad builder: pick a product or upload a photo, let Replix study it, choose your angle, then generate a batch of real creative concepts.",
       },
       { property: "og:title", content: "Create Ad — Replix AI Ad Studio" },
       {
@@ -45,12 +62,19 @@ export const Route = createFileRoute("/create")({
   component: CreateAd,
 });
 
-const stepLabels = [
-  "Pick a product",
-  "Understanding your product",
-  "Choose your angle",
-  "Generate",
-];
+const stepLabels = ["Pick a product", "Understanding your product", "Choose your angle", "Generate"];
+
+/** What we are making ads for: a catalogue product or an uploaded photo. */
+type Subject = {
+  id: string;
+  name: string;
+  price?: number;
+  /** What we show in the UI. */
+  displayImage: string;
+  /** The real reference photo handed to the AI. */
+  dataUrl: string;
+  source: "shopify" | "upload";
+};
 
 function StepRail({ step }: { step: number }) {
   return (
@@ -91,53 +115,81 @@ function StepRail({ step }: { step: number }) {
   );
 }
 
-/* ---------- Step 2: the study moment ---------- */
+/* ---------- Step 2: the study moment, now a real photo analysis ---------- */
 
 function UnderstandingStep({
-  productId,
-  onDone,
-  done,
+  subject,
+  analysis,
+  onAnalysed,
 }: {
-  productId: string;
-  onDone: () => void;
-  done: boolean;
+  subject: Subject;
+  analysis: ProductAnalysis | null;
+  onAnalysed: (analysis: ProductAnalysis) => void;
 }) {
-  const product = productById(productId)!;
-  const [completed, setCompleted] = useState(done ? understandingSteps.length : 0);
-  const [revealed, setRevealed] = useState(done);
+  const [completed, setCompleted] = useState(analysis ? understandingSteps.length : 0);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (done) return;
+    if (analysis) {
+      setCompleted(understandingSteps.length);
+      return;
+    }
+    let active = true;
+    setError(null);
     setCompleted(0);
-    setRevealed(false);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    understandingSteps.forEach((_, i) => {
-      timers.push(setTimeout(() => setCompleted(i + 1), 1250 * (i + 1)));
-    });
-    timers.push(
-      setTimeout(
-        () => {
-          setRevealed(true);
-          onDone();
-        },
-        1250 * understandingSteps.length + 700,
-      ),
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [productId, done, onDone]);
+
+    // Pace the visible ticks so the two early stages always read, even on a fast reply.
+    const timers = [
+      setTimeout(() => active && setCompleted((c) => Math.max(c, 1)), 1100),
+      setTimeout(() => active && setCompleted((c) => Math.max(c, 2)), 2300),
+    ];
+    const started = Date.now();
+
+    void analyzeProductImage({
+      data: {
+        imageDataUrl: subject.dataUrl,
+        productName: subject.name,
+        ...(subject.price !== undefined ? { price: subject.price } : {}),
+        storeName: subject.source === "shopify" ? store.name : undefined,
+      },
+    })
+      .then((result) => {
+        const wait = Math.max(0, 3600 - (Date.now() - started));
+        timers.push(
+          setTimeout(() => {
+            if (!active) return;
+            setCompleted(understandingSteps.length);
+            onAnalysed(result);
+          }, wait),
+        );
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : "We could not read that photo.");
+      });
+
+    return () => {
+      active = false;
+      timers.forEach(clearTimeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject.dataUrl, attempt]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
       <div className="card-soft self-start overflow-hidden">
         <img
-          src={product.image}
-          alt={product.name}
+          src={subject.displayImage}
+          alt={subject.name}
           className="aspect-square w-full object-cover"
           loading="lazy"
         />
         <div className="p-4">
-          <p className="font-display font-semibold">{product.name}</p>
-          <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+          <p className="font-display font-semibold">{subject.name}</p>
+          {subject.price !== undefined ? (
+            <p className="text-sm text-muted-foreground">${subject.price.toFixed(2)}</p>
+          ) : null}
         </div>
       </div>
 
@@ -149,7 +201,7 @@ function UnderstandingStep({
           <ul className="mt-4 space-y-3">
             {understandingSteps.map((label, i) => {
               const isDone = completed > i;
-              const isActive = completed === i;
+              const isActive = completed === i && !error;
               return (
                 <li key={label} className="flex items-center gap-3">
                   <span
@@ -191,7 +243,18 @@ function UnderstandingStep({
           />
         </div>
 
-        {revealed ? (
+        {error ? (
+          <div className="card-soft p-6">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <h3 className="font-display text-lg font-semibold">We couldn't read that photo</h3>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+            <Button className="mt-4" onClick={() => setAttempt((a) => a + 1)}>
+              Try again
+            </Button>
+          </div>
+        ) : analysis ? (
           <div className="card-soft animate-fade-in p-6">
             <div className="flex items-center gap-2">
               <span className="rounded-lg bg-gold-soft p-2 text-navy">
@@ -200,13 +263,37 @@ function UnderstandingStep({
               <h3 className="font-display text-lg font-semibold">Here's what we found</h3>
             </div>
             <ul className="mt-4 space-y-3">
-              {product.insights.map((insight) => (
+              {analysis.insights.map((insight) => (
                 <li key={insight} className="flex gap-3 rounded-xl bg-muted/70 p-3">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
                   <p className="text-sm leading-relaxed">{insight}</p>
                 </li>
               ))}
             </ul>
+            {analysis.colors.length || analysis.materials.length || analysis.visibleText.length ? (
+              <div className="mt-4 space-y-2 rounded-xl bg-muted/50 p-3 text-xs">
+                {analysis.colors.length ? (
+                  <p>
+                    <span className="font-semibold">Colours we can see:</span>{" "}
+                    <span className="text-muted-foreground">{analysis.colors.join(", ")}</span>
+                  </p>
+                ) : null}
+                {analysis.materials.length ? (
+                  <p>
+                    <span className="font-semibold">Materials and finishes:</span>{" "}
+                    <span className="text-muted-foreground">{analysis.materials.join(", ")}</span>
+                  </p>
+                ) : null}
+                {analysis.visibleText.length ? (
+                  <p>
+                    <span className="font-semibold">Text on the pack:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {analysis.visibleText.join(" · ")}
+                    </span>
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="card-soft p-6">
@@ -223,27 +310,34 @@ function UnderstandingStep({
               ))}
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              Give us a few seconds — we read the photo, the copy and the review language before we
-              write anything.
+              Give us a few seconds — we read the photo itself before we write anything.
             </p>
           </div>
         )}
-
       </div>
     </div>
   );
 }
 
-/* ---------- Step 4: generation ---------- */
+/* ---------- Step 4: real generation progress ---------- */
 
-function GenerationProgress({ count }: { count: number }) {
-  const [stage, setStage] = useState(0);
-  useEffect(() => {
-    const timers = generationSteps.map((_, i) =>
-      setTimeout(() => setStage(i + 1), 900 * (i + 1)),
-    );
-    return () => timers.forEach(clearTimeout);
-  }, []);
+function GenerationProgress({
+  count,
+  copyDone,
+  imagesDone,
+}: {
+  count: number;
+  copyDone: boolean;
+  imagesDone: number;
+}) {
+  const stages = [
+    { label: "Writing hooks, captions and calls to action", done: copyDone },
+    {
+      label: `Building ad scenes around your real product (${imagesDone} of ${count})`,
+      done: imagesDone >= count,
+    },
+  ];
+  const progress = ((copyDone ? 1 : 0) + imagesDone / count) / 2;
 
   return (
     <div className="card-soft mx-auto max-w-xl p-8 text-center">
@@ -252,45 +346,175 @@ function GenerationProgress({ count }: { count: number }) {
         Generating {count} concepts for you
       </h3>
       <ul className="mt-6 space-y-2.5 text-left">
-        {generationSteps.map((label, i) => (
-          <li key={label} className="flex items-center gap-3 text-sm">
+        {stages.map((stage) => (
+          <li key={stage.label} className="flex items-center gap-3 text-sm">
             <span
               className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full",
-                stage > i ? "bg-success text-navy-foreground" : "bg-muted text-muted-foreground",
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+                stage.done ? "bg-success text-navy-foreground" : "bg-muted text-muted-foreground",
               )}
             >
-              {stage > i ? (
+              {stage.done ? (
                 <Check className="h-3.5 w-3.5" />
               ) : (
-                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                <Loader2 className="h-3 w-3 animate-spin" />
               )}
             </span>
-            <span className={stage > i ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+            <span className={stage.done ? "text-foreground" : "text-muted-foreground"}>
+              {stage.label}
+            </span>
           </li>
         ))}
       </ul>
-      <Progress value={(stage / generationSteps.length) * 100} className="mt-6 h-2" />
+      <Progress value={progress * 100} className="mt-6 h-2" />
+      <p className="mt-4 text-xs text-muted-foreground">
+        Real image generation takes a little while — cards fill in as each one lands.
+      </p>
+    </div>
+  );
+}
+
+/* ---------- Step 1: pick a product or upload a photo ---------- */
+
+function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      setDataUrl(await fileToDataUrl(file));
+      if (!name) setName(file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "));
+    } catch {
+      toast.error("We couldn't read that image file.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const start = () => {
+    if (!dataUrl) return;
+    const parsedPrice = Number.parseFloat(price);
+    onReady({
+      id: `upload-${Date.now()}`,
+      name: name.trim() || "Your product",
+      ...(Number.isFinite(parsedPrice) ? { price: parsedPrice } : {}),
+      displayImage: dataUrl,
+      dataUrl,
+      source: "upload",
+    });
+  };
+
+  return (
+    <div className="card-soft grid gap-6 p-6 lg:grid-cols-[320px_1fr]">
+      <button
+        onClick={() => inputRef.current?.click()}
+        className={cn(
+          "flex aspect-square w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed border-border bg-muted/50 transition-colors hover:border-primary",
+          dataUrl && "border-solid",
+        )}
+      >
+        {dataUrl ? (
+          <img src={dataUrl} alt="Your uploaded product" className="h-full w-full object-cover" />
+        ) : busy ? (
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        ) : (
+          <>
+            <ImagePlus className="h-7 w-7 text-muted-foreground" />
+            <span className="text-sm font-semibold">Choose a photo</span>
+            <span className="text-xs text-muted-foreground">JPG or PNG, up to 10MB</span>
+          </>
+        )}
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => void handleFile(e.target.files?.[0])}
+      />
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="upload-name">Product name (optional)</Label>
+          <Input
+            id="upload-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Sea Salt Caramel Cold Brew"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="upload-price">Price (optional)</Label>
+          <Input
+            id="upload-price"
+            value={price}
+            inputMode="decimal"
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="35.99"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Your photo is used as the real reference for both the insights and every generated ad
+          scene, so the product stays recognisable.
+        </p>
+        <Button disabled={!dataUrl} onClick={start}>
+          Study this photo <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
 
 function CreateAd() {
-  const { addAds, replaceAd, spendCredits } = useStudio();
+  const { addAds, replaceAd, removeAd, spendCredits } = useStudio();
   const [step, setStep] = useState(1);
-  const [productId, setProductId] = useState<string | null>(null);
-  const [studyDone, setStudyDone] = useState(false);
+  const [mode, setMode] = useState<"product" | "upload">("product");
+  const [subject, setSubject] = useState<Subject | null>(null);
+  const [preparing, setPreparing] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<ProductAnalysis | null>(null);
   const [objective, setObjective] = useState<ObjectiveId | null>(null);
   const [themeIds, setThemeIds] = useState<ThemeId[]>([]);
   const [format, setFormat] = useState<AdFormat>("1:1");
   const [batch, setBatch] = useState(5);
   const [generating, setGenerating] = useState(false);
+  const [copyDone, setCopyDone] = useState(false);
+  const [imagesDone, setImagesDone] = useState(0);
+  const [pending, setPending] = useState(0);
   const [results, setResults] = useState<Ad[]>([]);
-  const generatedCount = useRef(0);
+  const [genError, setGenError] = useState<string | null>(null);
+  const batchIndex = useRef(0);
 
-  const pickProduct = (id: string) => {
-    setProductId(id);
-    setStudyDone(false);
+  const pickProduct = async (id: string) => {
+    const product = products.find((p) => p.id === id);
+    if (!product) return;
+    setPreparing(id);
+    try {
+      const dataUrl = await urlToDataUrl(product.image);
+      setSubject({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        displayImage: product.image,
+        dataUrl,
+        source: "shopify",
+      });
+      setAnalysis(null);
+      setStep(2);
+    } catch {
+      toast.error("Could not open that product photo.");
+    } finally {
+      setPreparing(null);
+    }
+  };
+
+  const startUpload = (next: Subject) => {
+    setSubject(next);
+    setAnalysis(null);
     setStep(2);
   };
 
@@ -299,42 +523,151 @@ function CreateAd() {
       prev.includes(id) ? prev.filter((t) => t !== id) : prev.length >= 3 ? prev : [...prev, id],
     );
 
-  const runGeneration = (count: number) => {
-    if (!productId || !objective) return;
+  const platformFor = (index: number): Platform => (index % 2 === 0 ? "instagram" : "facebook");
+
+  /** Generate the hero image for one concept, persist it, then swap it into the grid. */
+  const renderAndSave = useCallback(
+    async (draft: Ad, imageBrief: string, dataUrl: string) => {
+      try {
+        const { path, signedUrl } = await renderAdImage({
+          data: {
+            imageDataUrl: dataUrl,
+            imageBrief,
+            productName: draft.productName,
+            format: draft.format,
+          },
+        });
+        const withImage: Ad = { ...draft, image: signedUrl, imagePath: path };
+        const saved = await saveAd(withImage);
+        setResults((prev) => prev.map((r) => (r.id === draft.id ? saved : r)));
+        replaceAd(draft.id, saved);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Image generation failed.";
+        toast.error(message);
+        setResults((prev) => prev.filter((r) => r.id !== draft.id));
+        removeAd(draft.id);
+      } finally {
+        setImagesDone((n) => n + 1);
+        setPending((n) => Math.max(0, n - 1));
+      }
+    },
+    [replaceAd, removeAd],
+  );
+
+  const runGeneration = async (count: number) => {
+    if (!subject || !objective || !analysis) return;
+    const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
+    const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
+
     setGenerating(true);
-    const offset = generatedCount.current;
-    setTimeout(() => {
-      const batchResults = generateConcepts({
-        productId,
-        objective,
-        themeIds,
-        format,
-        count,
-        offset,
+    setGenError(null);
+    setCopyDone(false);
+    setImagesDone(0);
+    setPending(count);
+
+    try {
+      const concepts = await generateAdCopy({
+        data: {
+          analysis,
+          productName: subject.name,
+          ...(subject.price !== undefined ? { price: subject.price } : {}),
+          storeName: subject.source === "shopify" ? store.name : undefined,
+          objective,
+          objectiveLabel,
+          themes: chosenThemes,
+          format,
+          count,
+          variantSeed: batchIndex.current,
+        },
       });
-      generatedCount.current = offset + count;
-      setResults((prev) => [...prev, ...batchResults]);
-      addAds(batchResults);
-      spendCredits(count);
+      batchIndex.current += 1;
+      setCopyDone(true);
+
+      const drafts: Ad[] = concepts.map((concept, i) => ({
+        id: `draft-${Date.now()}-${i}`,
+        productId: subject.id,
+        productName: subject.name,
+        platform: platformFor(i),
+        format,
+        theme: (chosenThemes.find((t) => t.id === concept.theme)?.id ??
+          chosenThemes[i % chosenThemes.length]!.id) as ThemeId,
+        objective,
+        image: "",
+        source: subject.source,
+        audience: concept.audience,
+        coreIdea: concept.coreIdea,
+        headline: concept.headline,
+        caption: concept.caption,
+        cta: concept.cta,
+        favorite: false,
+        createdAt: "Just now",
+        collectionIds: [],
+      }));
+
+      setResults((prev) => [...prev, ...drafts]);
+      addAds(drafts);
+      spendCredits(concepts.length);
+      setPending(concepts.length);
       setGenerating(false);
-    }, 900 * generationSteps.length + 600);
+
+      await Promise.all(
+        drafts.map((draft, i) =>
+          renderAndSave(draft, concepts[i]!.imageBrief, subject.dataUrl),
+        ),
+      );
+    } catch (err) {
+      setGenError(err instanceof Error ? err.message : "Generation failed.");
+      setGenerating(false);
+      setPending(0);
+    }
   };
 
-  const handleRegenerate = (ad: Ad) => {
-    if (!productId || !objective) return;
-    const offset = generatedCount.current;
-    const [next] = generateConcepts({
-      productId,
-      objective,
-      themeIds,
-      format,
-      count: 1,
-      offset: offset + 1,
-    });
-    if (!next) return;
-    generatedCount.current = offset + 1;
-    setResults((prev) => prev.map((r) => (r.id === ad.id ? next : r)));
-    replaceAd(ad.id, next);
+  const handleRegenerate = async (ad: Ad) => {
+    if (!subject || !objective || !analysis) return;
+    const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
+    const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
+    try {
+      const [concept] = await generateAdCopy({
+        data: {
+          analysis,
+          productName: subject.name,
+          ...(subject.price !== undefined ? { price: subject.price } : {}),
+          storeName: subject.source === "shopify" ? store.name : undefined,
+          objective,
+          objectiveLabel,
+          themes: chosenThemes.length ? chosenThemes : themes.slice(0, 1),
+          format: ad.format,
+          count: 1,
+          variantSeed: batchIndex.current + 1,
+        },
+      });
+      if (!concept) return;
+      batchIndex.current += 1;
+      const { path, signedUrl } = await renderAdImage({
+        data: {
+          imageDataUrl: subject.dataUrl,
+          imageBrief: concept.imageBrief,
+          productName: subject.name,
+          format: ad.format,
+        },
+      });
+      const next: Ad = {
+        ...ad,
+        audience: concept.audience,
+        coreIdea: concept.coreIdea,
+        headline: concept.headline,
+        caption: concept.caption,
+        cta: concept.cta,
+        image: signedUrl,
+        imagePath: path,
+      };
+      const saved = await saveAd(next);
+      setResults((prev) => prev.map((r) => (r.id === ad.id ? saved : r)));
+      replaceAd(ad.id, saved);
+      spendCredits(1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not regenerate that concept.");
+    }
   };
 
   return (
@@ -347,45 +680,79 @@ function CreateAd() {
 
         {step === 1 ? (
           <section className="space-y-5">
-            <div>
-              <h2 className="font-display text-xl font-semibold">Pick a product</h2>
-              <p className="text-sm text-muted-foreground">
-                Pulled live from your store, ranked by best seller.
-              </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="font-display text-xl font-semibold">Pick a product</h2>
+                <p className="text-sm text-muted-foreground">
+                  Pulled live from your store, ranked by best seller — or start from any photo.
+                </p>
+              </div>
+              <div className="flex gap-1 rounded-full border border-border bg-card p-1">
+                {(
+                  [
+                    { id: "product", label: "Pick a Shopify product", icon: Store },
+                    { id: "upload", label: "Upload an image", icon: Upload },
+                  ] as const
+                ).map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setMode(id)}
+                    className={cn(
+                      "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
+                      mode === id
+                        ? "bg-gold-soft text-navy"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" /> {label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-              {products.map((product) => (
-                <button
-                  key={product.id}
-                  onClick={() => pickProduct(product.id)}
-                  className={cn(
-                    "card-soft overflow-hidden text-left transition-all hover:-translate-y-0.5 hover:shadow-lift",
-                    productId === product.id && "ring-2 ring-primary",
-                  )}
-                >
-                  <div className="relative">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      loading="lazy"
-                      className="aspect-square w-full object-cover"
-                    />
-                    <Badge className="absolute top-3 left-3 bg-navy/85 text-[0.65rem] text-navy-foreground hover:bg-navy">
-                      #{product.rank} best seller
-                    </Badge>
-                  </div>
-                  <div className="space-y-1 p-4">
-                    <p className="font-display font-semibold">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
-                    <p className="pt-1 text-xs text-muted-foreground">{product.bestSellerNote}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
+
+            {mode === "product" ? (
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                {products.map((product) => (
+                  <button
+                    key={product.id}
+                    disabled={preparing !== null}
+                    onClick={() => void pickProduct(product.id)}
+                    className={cn(
+                      "card-soft overflow-hidden text-left transition-all hover:-translate-y-0.5 hover:shadow-lift",
+                      subject?.id === product.id && "ring-2 ring-primary",
+                    )}
+                  >
+                    <div className="relative">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        loading="lazy"
+                        className="aspect-square w-full object-cover"
+                      />
+                      <Badge className="absolute top-3 left-3 bg-navy/85 text-[0.65rem] text-navy-foreground hover:bg-navy">
+                        #{product.rank} best seller
+                      </Badge>
+                      {preparing === product.id ? (
+                        <span className="absolute inset-0 flex items-center justify-center bg-navy/40">
+                          <Loader2 className="h-6 w-6 animate-spin text-navy-foreground" />
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="space-y-1 p-4">
+                      <p className="font-display font-semibold">{product.name}</p>
+                      <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+                      <p className="pt-1 text-xs text-muted-foreground">{product.bestSellerNote}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <UploadPanel onReady={startUpload} />
+            )}
           </section>
         ) : null}
 
-        {step === 2 && productId ? (
+        {step === 2 && subject ? (
           <section className="space-y-5">
             <div>
               <h2 className="font-display text-xl font-semibold">Understanding your product</h2>
@@ -393,17 +760,13 @@ function CreateAd() {
                 Before we write a single hook, we look at what you're actually selling.
               </p>
             </div>
-            <UnderstandingStep
-              productId={productId}
-              done={studyDone}
-              onDone={() => setStudyDone(true)}
-            />
+            <UnderstandingStep subject={subject} analysis={analysis} onAnalysed={setAnalysis} />
             <div className="flex items-center justify-between">
               <Button variant="ghost" onClick={() => setStep(1)}>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Change product
               </Button>
-              <Button disabled={!studyDone} onClick={() => setStep(3)}>
-                {studyDone ? "Choose your angle" : "Studying…"}
+              <Button disabled={!analysis} onClick={() => setStep(3)}>
+                {analysis ? "Choose your angle" : "Studying…"}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
@@ -469,7 +832,11 @@ function CreateAd() {
                             : "bg-muted text-muted-foreground",
                         )}
                       >
-                        {selected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                        {selected ? (
+                          <Check className="h-3.5 w-3.5" />
+                        ) : (
+                          <Plus className="h-3.5 w-3.5" />
+                        )}
                       </span>
                       <span>
                         <span className="block font-display font-semibold">{t.label}</span>
@@ -540,11 +907,16 @@ function CreateAd() {
                     </button>
                   ))}
                 </div>
+                {genError ? (
+                  <p className="mt-5 flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {genError}
+                  </p>
+                ) : null}
                 <div className="mt-6 flex items-center justify-between">
                   <Button variant="ghost" onClick={() => setStep(3)}>
                     <ArrowLeft className="mr-1 h-4 w-4" /> Back
                   </Button>
-                  <Button size="lg" onClick={() => runGeneration(batch)}>
+                  <Button size="lg" onClick={() => void runGeneration(batch)}>
                     <Sparkles className="mr-1 h-4 w-4" /> Generate {batch} concepts
                   </Button>
                 </div>
@@ -553,7 +925,7 @@ function CreateAd() {
 
             {generating ? (
               <>
-                <GenerationProgress count={batch} />
+                <GenerationProgress count={batch} copyDone={copyDone} imagesDone={imagesDone} />
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {Array.from({ length: batch }, (_, i) => (
                     <AdCardSkeleton key={i} />
@@ -561,7 +933,6 @@ function CreateAd() {
                 </div>
               </>
             ) : null}
-
 
             {results.length > 0 && !generating ? (
               <>
@@ -571,20 +942,32 @@ function CreateAd() {
                       {results.length} concepts ready
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                      Star the ones worth running — they'll show up in your gallery either way.
+                      {pending > 0
+                        ? `Still painting ${pending} scene${pending === 1 ? "" : "s"} around your product…`
+                        : "Star the ones worth running — they'll show up in your gallery either way."}
                     </p>
                   </div>
                   <Button variant="ghost" onClick={() => setStep(3)}>
                     <ArrowLeft className="mr-1 h-4 w-4" /> Change the angle
                   </Button>
                 </div>
+                {genError ? (
+                  <p className="flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {genError}
+                  </p>
+                ) : null}
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {results.map((ad) => (
                     <AdCard key={ad.id} ad={ad} onRegenerate={handleRegenerate} />
                   ))}
                 </div>
                 <div className="flex justify-center">
-                  <Button variant="outline" size="lg" onClick={() => runGeneration(5)}>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    disabled={pending > 0}
+                    onClick={() => void runGeneration(5)}
+                  >
                     <Plus className="mr-1 h-4 w-4" /> Generate 5 more
                   </Button>
                 </div>
