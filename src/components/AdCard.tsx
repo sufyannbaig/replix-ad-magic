@@ -63,7 +63,10 @@ function PlatformPreview({
               <p className="text-[0.65rem] text-muted-foreground">Sponsored</p>
             </div>
           </div>
-          <img src={ad.image} alt={ad.headline} className="aspect-square w-full object-cover" />
+          <div className="relative">
+            <img src={ad.image} alt={ad.headline} className="aspect-square w-full object-cover" />
+            {ad.image ? <AdOverlay ad={ad} /> : null}
+          </div>
           <div className="space-y-2 p-3">
             <p className="text-sm font-semibold">{ad.headline}</p>
             <p className="text-xs text-muted-foreground">{ad.caption}</p>
