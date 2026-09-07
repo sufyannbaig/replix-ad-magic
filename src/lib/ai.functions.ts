@@ -172,13 +172,15 @@ export const renderAdImage = createServerFn({ method: "POST" })
           ? "a 4:5 portrait feed composition"
           : "a square 1:1 feed composition";
 
-    const prompt = `Create a premium, photorealistic social advertising image in ${aspect}.
+    const prompt = `Image-to-image task: take the attached photo of ${data.productName} and re-render it into a completely new photorealistic advertising scene in ${aspect}.
 
-Use the attached photo as the EXACT product reference. The real product must appear in the final image and stay clearly recognisable: identical shape, packaging, label artwork, typography and colours. Do not redesign, rename, restyle or replace the product, and do not add invented logos or text to the pack.
+LOCKED REFERENCE — the product itself: copy the physical product from the attached photo pixel-faithfully. Its silhouette, proportions, packaging artwork, logo, label typography, wording and exact colours must be preserved so a viewer instantly recognises it as the same physical item. Never redraw, restyle, re-letter, warp, blur or substitute the packaging, and never invent extra logos or text on it.
 
-Scene direction: ${data.imageBrief}
+FULLY RE-RENDER EVERYTHING ELSE: build a brand-new environment — different background, surface, surrounding props, camera angle, depth of field, lighting setup, colour grade and any motion or splash elements. The result must NOT look like the original photo with a filter or a pasted cut-out; the source background, backdrop and framing must be entirely replaced, and the product must be relit and re-shadowed so it sits naturally in the new scene with physically correct contact shadows and reflections.
 
-Product: ${data.productName}. Studio-grade commercial lighting, realistic shadows and reflections, clean composition with empty space where a headline could later be placed. Critical: render NO added words anywhere in the image — no headline text, no placeholder text, no captions, no logos, no watermarks, no borders. The only text allowed is the packaging text that already exists in the reference photo.`;
+New scene direction: ${data.imageBrief}
+
+Studio-grade commercial photography quality, clean composition with breathing room where a headline could later be placed. Render NO added words anywhere in the image — no headline text, no captions, no watermarks, no borders. The only text allowed is the packaging text that already exists in the reference photo.`;
 
     const b64 = await gatewayImage(prompt, data.imageDataUrl);
     const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
