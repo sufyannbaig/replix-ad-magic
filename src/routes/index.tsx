@@ -61,13 +61,13 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-xl bg-navy p-7 text-navy-foreground shadow-lift lg:col-span-2">
+          <div className="relative overflow-hidden rounded-xl bg-navy p-6 text-navy-foreground sm:p-7 shadow-lift lg:col-span-2">
             <div className="absolute -top-16 -right-10 h-52 w-52 rounded-full bg-gold/20 blur-2xl" />
             <div className="relative max-w-xl">
               <Badge className="bg-gold text-primary-foreground hover:bg-gold">
                 <Sparkles className="mr-1 h-3 w-3" /> Ready when you are
               </Badge>
-              <h2 className="mt-4 font-display text-3xl leading-tight font-semibold">
+              <h2 className="mt-4 font-display text-2xl leading-tight sm:text-3xl font-semibold">
                 Generate Your Next Winning Ad
               </h2>
               <p className="mt-2 text-sm text-navy-foreground/70">
@@ -83,23 +83,23 @@ function Dashboard() {
           </div>
         </section>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           {tiles.map(({ label, value, icon: Icon, note }) => (
-            <div key={label} className="card-soft p-5">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{label}</p>
-                <span className="rounded-lg bg-gold-soft p-2 text-navy">
+            <div key={label} className="card-soft p-4 sm:p-5">
+              <div className="flex items-start justify-between gap-2">
+                <p className="min-w-0 text-xs text-muted-foreground sm:text-sm">{label}</p>
+                <span className="shrink-0 rounded-lg bg-gold-soft p-1.5 text-navy sm:p-2">
                   <Icon className="h-4 w-4" />
                 </span>
               </div>
-              <p className="mt-3 font-display text-2xl font-semibold">{value}</p>
-              <p className="text-xs text-muted-foreground">{note}</p>
+              <p className="mt-2 font-display text-xl font-semibold sm:mt-3 sm:text-2xl">{value}</p>
+              <p className="text-[0.7rem] text-muted-foreground sm:text-xs">{note}</p>
             </div>
           ))}
         </section>
 
         <section>
-          <div className="mb-4 flex items-end justify-between">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 className="font-display text-lg font-semibold">Recent creatives</h2>
               <p className="text-sm text-muted-foreground">The latest ads across both platforms</p>
