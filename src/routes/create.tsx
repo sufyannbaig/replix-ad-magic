@@ -125,7 +125,7 @@ function UnderstandingStep({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-      <div className="card-soft overflow-hidden">
+      <div className="card-soft self-start overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
