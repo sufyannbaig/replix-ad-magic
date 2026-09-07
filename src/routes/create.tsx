@@ -610,6 +610,7 @@ function CreateAd() {
         headline: concept.headline,
         caption: concept.caption,
         cta: concept.cta,
+        ...(concept.overlay?.hero ? { overlay: concept.overlay } : {}),
         favorite: false,
         createdAt: "Just now",
         collectionIds: [],
