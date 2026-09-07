@@ -232,7 +232,12 @@ export type Ad = {
   format: AdFormat;
   theme: ThemeId;
   objective: ObjectiveId;
+  /** Displayable image URL; empty while the image is still being generated. */
   image: string;
+  /** Storage path of the generated image, when it is a real generated ad. */
+  imagePath?: string;
+  /** "shopify" for catalogue products, "upload" for a customer-supplied photo. */
+  source?: string;
   audience: string;
   coreIdea: string;
   headline: string;
