@@ -42,6 +42,17 @@ import { saveAd } from "@/lib/ads-repo";
 import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
+import themeShowcase from "@/assets/theme-showcase.jpg.asset.json";
+import themeStats from "@/assets/theme-stats.jpg.asset.json";
+import themeTestimonial from "@/assets/theme-testimonial.jpg.asset.json";
+import themeUsVsThem from "@/assets/theme-us-vs-them.jpg.asset.json";
+
+const themeThumbs: Record<ThemeId, string> = {
+  showcase: themeShowcase.url,
+  stats: themeStats.url,
+  testimonial: themeTestimonial.url,
+  "us-vs-them": themeUsVsThem.url,
+};
 
 export const Route = createFileRoute("/create")({
   head: () => ({
