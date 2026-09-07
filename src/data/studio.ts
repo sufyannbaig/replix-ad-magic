@@ -278,7 +278,7 @@ const seed = (
   format,
   theme,
   objective,
-  image: adScenes[scene].src,
+  image: adScenes[scene]!.src,
   audience,
   coreIdea,
   headline,
@@ -464,7 +464,7 @@ export const seededAds: Ad[] = [
 
 /* ---------- Simulated generation ---------- */
 
-const audienceFor = (p: Product, i: number) => p.audiences[i % p.audiences.length];
+const audienceFor = (p: Product, i: number) => p.audiences[i % p.audiences.length]!;
 
 const coreIdeas: Record<ThemeId, (p: Product) => string[]> = {
   showcase: (p) => [
@@ -528,10 +528,10 @@ export function generateConcepts(input: GenerateInput): Ad[] {
 
   return Array.from({ length: input.count }, (_, k) => {
     const i = offset + k;
-    const theme = themeList[i % themeList.length];
+    const theme = themeList[i % themeList.length]!;
     const ideas = coreIdeas[theme](product);
-    const hook = product.hook[i % product.hook.length];
-    const scene = adScenes[(i * 3 + product.rank * 2) % adScenes.length];
+    const hook = product.hook[i % product.hook.length]!;
+    const scene = adScenes[(i * 3 + product.rank * 2) % adScenes.length]!;
 
     return {
       id: `gen-${product.id}-${theme}-${i}-${Math.random().toString(36).slice(2, 7)}`,
@@ -543,7 +543,7 @@ export function generateConcepts(input: GenerateInput): Ad[] {
       objective: input.objective,
       image: scene.src,
       audience: audienceFor(product, i),
-      coreIdea: ideas[i % ideas.length],
+      coreIdea: ideas[i % ideas.length]!,
       headline:
         theme === "testimonial"
           ? `"${product.quote.split(".")[0]}."`
@@ -551,7 +551,7 @@ export function generateConcepts(input: GenerateInput): Ad[] {
             ? product.stat
             : hook,
       caption: `${captionOpeners[theme](product)} ${objectiveTail[input.objective]} $${product.price.toFixed(2)} — 16 drinks per bottle.`,
-      cta: ctas[input.objective][i % ctas[input.objective].length],
+      cta: ctas[input.objective][i % ctas[input.objective].length]!,
       favorite: false,
       createdAt: "Just now",
       collectionIds: [],
