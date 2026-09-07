@@ -546,7 +546,7 @@ export function generateConcepts(input: GenerateInput): Ad[] {
       coreIdea: ideas[i % ideas.length]!,
       headline:
         theme === "testimonial"
-          ? `"${product.quote.split(".")[0]}."`
+          ? `"${product.quote.split(".")[0]!}."`
           : theme === "stats"
             ? product.stat
             : hook,
