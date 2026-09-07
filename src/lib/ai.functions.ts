@@ -178,7 +178,7 @@ Use the attached photo as the EXACT product reference. The real product must app
 
 Scene direction: ${data.imageBrief}
 
-Product: ${data.productName}. Studio-grade commercial lighting, realistic shadows and reflections, clean composition with room for a headline. No text overlays, no watermarks, no borders.`;
+Product: ${data.productName}. Studio-grade commercial lighting, realistic shadows and reflections, clean composition with empty space where a headline could later be placed. Critical: render NO added words anywhere in the image — no headline text, no placeholder text, no captions, no logos, no watermarks, no borders. The only text allowed is the packaging text that already exists in the reference photo.`;
 
     const b64 = await gatewayImage(prompt, data.imageDataUrl);
     const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
