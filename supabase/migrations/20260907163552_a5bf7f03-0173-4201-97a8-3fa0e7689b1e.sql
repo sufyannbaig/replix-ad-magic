@@ -1,0 +1,1 @@
+ALTER TABLE public.generated_ads ADD COLUMN IF NOT EXISTS overlay jsonb;

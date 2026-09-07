@@ -28,6 +28,7 @@ export type Database = {
           id: string
           image_url: string
           objective: string
+          overlay: Json | null
           platform: string
           product_id: string
           product_name: string
@@ -47,6 +48,7 @@ export type Database = {
           id?: string
           image_url: string
           objective: string
+          overlay?: Json | null
           platform: string
           product_id: string
           product_name: string
@@ -66,6 +68,7 @@ export type Database = {
           id?: string
           image_url?: string
           objective?: string
+          overlay?: Json | null
           platform?: string
           product_id?: string
           product_name?: string
