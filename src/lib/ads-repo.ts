@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { signAdImages } from "@/lib/ai.functions";
-import type { Ad, AdFormat, ObjectiveId, Platform, ThemeId } from "@/data/studio";
+import type { Ad, AdFormat, AdOverlay, ObjectiveId, Platform, ThemeId } from "@/data/studio";
 
 type Row = {
   id: string;
@@ -18,6 +18,7 @@ type Row = {
   headline: string;
   caption: string;
   cta: string;
+  overlay: AdOverlay | null;
   favorite: boolean;
   collection_ids: string[];
 };
@@ -42,6 +43,7 @@ function toAd(row: Row, signedUrl: string): Ad {
     headline: row.headline,
     caption: row.caption,
     cta: row.cta,
+    ...(row.overlay ? { overlay: row.overlay } : {}),
     favorite: row.favorite,
     createdAt: formatDate(row.created_at),
     collectionIds: row.collection_ids ?? [],
@@ -81,6 +83,7 @@ export async function saveAd(ad: Ad): Promise<Ad> {
       headline: ad.headline,
       caption: ad.caption,
       cta: ad.cta,
+      overlay: ad.overlay ?? null,
       favorite: ad.favorite,
       collection_ids: ad.collectionIds,
     })

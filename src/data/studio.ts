@@ -224,6 +224,14 @@ export const products: Product[] = [
 
 export const productById = (id: string) => products.find((p) => p.id === id);
 
+/** Short sell copy laid over the ad image as a sharp HTML/CSS text layer. */
+export type AdOverlay = {
+  hero: string;
+  support?: string;
+  attribution?: string;
+  badge?: string;
+};
+
 export type Ad = {
   id: string;
   productId: string;
@@ -243,6 +251,7 @@ export type Ad = {
   headline: string;
   caption: string;
   cta: string;
+  overlay?: AdOverlay;
   favorite: boolean;
   createdAt: string;
   collectionIds: string[];
