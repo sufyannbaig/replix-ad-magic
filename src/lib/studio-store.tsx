@@ -31,7 +31,14 @@ type StudioState = {
   spendCredits: (n: number) => void;
 };
 
-const StudioContext = createContext<StudioState | null>(null);
+// Keep one context instance across hot-reloads / duplicate module evaluations,
+// otherwise the provider and the consumers can end up on different contexts.
+const globalScope = globalThis as typeof globalThis & {
+  __replixStudioContext?: React.Context<StudioState | null>;
+};
+const StudioContext: React.Context<StudioState | null> =
+  globalScope.__replixStudioContext ?? createContext<StudioState | null>(null);
+globalScope.__replixStudioContext = StudioContext;
 
 export function StudioProvider({ children }: { children: ReactNode }) {
   const [ads, setAds] = useState<Ad[]>(seededAds);
