@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AdOverlay } from "@/components/AdOverlay";
+
 import { themes, type Ad, type Platform } from "@/data/studio";
 import { useStudio } from "@/lib/studio-store";
 import { downloadImage } from "@/lib/image-utils";
