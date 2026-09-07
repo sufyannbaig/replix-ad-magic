@@ -15,12 +15,12 @@ import scene10 from "@/assets/ad-scene-10.jpg";
 
 export const adScenes = [
   { src: scene1, label: "Sunlit marble counter" },
-  { src: scene2, label: "Overhead navy flat lay" },
+  { src: scene2, label: "Navy plinth spotlight" },
   { src: scene3, label: "Macro pour splash" },
   { src: scene4, label: "In-hand kitchen moment" },
   { src: scene5, label: "Old way vs new way" },
-  { src: scene6, label: "Street-style testimonial" },
-  { src: scene7, label: "Graphic stat frame" },
+  { src: scene6, label: "Teal wall, hard shadow" },
+  { src: scene7, label: "Off-white overhead flat lay" },
   { src: scene8, label: "Desk morning routine" },
   { src: scene9, label: "Collection pedestal" },
   { src: scene10, label: "Cozy evening pour" },
