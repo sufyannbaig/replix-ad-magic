@@ -423,7 +423,7 @@ function CreateAd() {
               <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
                 Campaign objective
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
                 {objectives.map((o) => (
                   <button
                     key={o.id}
@@ -521,7 +521,7 @@ function CreateAd() {
                   We generate more than you need, because the first couple are always warm-ups —
                   pick your favourites and bin the rest.
                 </p>
-                <div className="mt-5 flex gap-3">
+                <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
                   {[3, 5, 10].map((n) => (
                     <button
                       key={n}
@@ -551,7 +551,17 @@ function CreateAd() {
               </div>
             ) : null}
 
-            {generating ? <GenerationProgress count={batch} /> : null}
+            {generating ? (
+              <>
+                <GenerationProgress count={batch} />
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {Array.from({ length: batch }, (_, i) => (
+                    <AdCardSkeleton key={i} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+
 
             {results.length > 0 && !generating ? (
               <>
