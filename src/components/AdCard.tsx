@@ -150,6 +150,7 @@ export function AdCard({
             <p className="text-xs text-muted-foreground">Painting the scene…</p>
           </div>
         )}
+        {ad.image ? <AdOverlay ad={ad} /> : null}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <Badge className="bg-navy/85 text-[0.65rem] text-navy-foreground hover:bg-navy">
             {ad.platform === "instagram" ? "Instagram" : "Facebook"}
