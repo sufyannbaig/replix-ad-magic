@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AdOverlay } from "@/components/AdOverlay";
+
 import { themes, type Ad, type Platform } from "@/data/studio";
 import { useStudio } from "@/lib/studio-store";
 import { downloadImage } from "@/lib/image-utils";
@@ -63,10 +63,7 @@ function PlatformPreview({
               <p className="text-[0.65rem] text-muted-foreground">Sponsored</p>
             </div>
           </div>
-          <div className="relative">
-            <img src={ad.image} alt={ad.headline} className="aspect-square w-full object-cover" />
-            {ad.image ? <AdOverlay ad={ad} /> : null}
-          </div>
+          <img src={ad.image} alt={ad.headline} className="aspect-square w-full object-cover" />
           <div className="space-y-2 p-3">
             <p className="text-sm font-semibold">{ad.headline}</p>
             <p className="text-xs text-muted-foreground">{ad.caption}</p>
@@ -154,7 +151,6 @@ export function AdCard({
             <p className="text-xs text-muted-foreground">Painting the scene…</p>
           </div>
         )}
-        {ad.image ? <AdOverlay ad={ad} /> : null}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <Badge className="bg-navy/85 text-[0.65rem] text-navy-foreground hover:bg-navy">
             {ad.platform === "instagram" ? "Instagram" : "Facebook"}
