@@ -43,6 +43,8 @@ function toAd(row: Row, signedUrl: string): Ad {
     headline: row.headline,
     caption: row.caption,
     cta: row.cta,
+    ...(row.overlay ? { overlay: row.overlay } : {}),
+
     favorite: row.favorite,
     createdAt: formatDate(row.created_at),
     collectionIds: row.collection_ids ?? [],
