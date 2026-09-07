@@ -39,7 +39,7 @@ export const Route = createFileRoute("/create")({
       },
     ],
   }),
-  component: CreateAd;
+  component: CreateAd,
 });
 
 const stepLabels = [
