@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { FolderOpen } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
+
 import { useStudio } from "@/lib/studio-store";
 
 export const Route = createFileRoute("/collections")({
@@ -26,6 +28,19 @@ export const Route = createFileRoute("/collections")({
 
 function Collections() {
   const { collections, ads } = useStudio();
+  const savedCount = ads.filter((a) => a.collectionIds.length).length;
+
+  if (!savedCount) {
+    return (
+      <AppShell title="Collections" subtitle="Grouped creatives you can reuse campaign to campaign">
+        <EmptyState
+          icon={FolderOpen}
+          title="No collections saved yet"
+          body="Collections are folders of creatives you want to run again. Generate a batch, star the ones that work, and they'll be grouped here by campaign intent."
+        />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell title="Collections" subtitle="Grouped creatives you can reuse campaign to campaign">
@@ -35,6 +50,7 @@ function Collections() {
           return (
             <section key={collection.id}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+
                 <div className="flex items-start gap-3">
                   <span className="rounded-xl bg-gold-soft p-2.5 text-navy">
                     <FolderOpen className="h-5 w-5" />
