@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { Search, Images, Instagram, Facebook } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
+import { EmptyState } from "@/components/EmptyState";
+
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStudio } from "@/lib/studio-store";
@@ -50,21 +52,37 @@ function Gallery() {
     { label: "Facebook", value: ads.filter((a) => a.platform === "facebook").length, icon: Facebook },
   ];
 
+  if (!ads.length) {
+    return (
+      <AppShell title="Ad Gallery" subtitle="Every creative Replix has made for Zaffo Coffee">
+        <EmptyState
+          icon={Images}
+          title="No creatives yet"
+          body="Your gallery fills up automatically. Pick a product, let Replix study it, and every concept it generates lands here — searchable and filterable by platform."
+        />
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell title="Ad Gallery" subtitle="Every creative Replix has made for Zaffo Coffee">
       <div className="space-y-7">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
           {tiles.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="card-soft flex items-center gap-4 p-5">
-              <span className="rounded-xl bg-gold-soft p-2.5 text-navy">
-                <Icon className="h-5 w-5" />
+            <div
+              key={label}
+              className="card-soft flex flex-col items-start gap-2 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5"
+            >
+              <span className="rounded-xl bg-gold-soft p-2 text-navy sm:p-2.5">
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </span>
-              <div>
-                <p className="font-display text-2xl font-semibold">{value}</p>
-                <p className="text-sm text-muted-foreground">{label}</p>
+              <div className="min-w-0">
+                <p className="font-display text-xl font-semibold sm:text-2xl">{value}</p>
+                <p className="truncate text-xs text-muted-foreground sm:text-sm">{label}</p>
               </div>
             </div>
           ))}
+
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

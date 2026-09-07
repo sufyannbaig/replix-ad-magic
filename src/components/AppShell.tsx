@@ -40,9 +40,10 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col bg-navy text-navy-foreground">
       <div className="px-6 pt-7 pb-6">
         <Link to="/" onClick={onNavigate} className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold text-base font-bold text-primary-foreground">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gold font-display text-lg leading-none font-bold text-navy">
             R
           </span>
+
           <span className="font-display text-lg font-semibold tracking-tight">
             Replix <span className="text-gold">AI</span>
           </span>

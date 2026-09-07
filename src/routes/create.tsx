@@ -3,9 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, Lightbulb, Plus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
+import { AdCardSkeleton } from "@/components/AdCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+
 import {
   formats,
   generateConcepts,
@@ -206,11 +209,26 @@ function UnderstandingStep({
             </ul>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Give us a few seconds — we read the photo, the copy and the review language before we
-            write anything.
-          </p>
+          <div className="card-soft p-6">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-8 w-8 rounded-lg" />
+              <Skeleton className="h-5 w-48" />
+            </div>
+            <div className="mt-4 space-y-3">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="space-y-2 rounded-xl bg-muted/70 p-3">
+                  <Skeleton className="h-3.5 w-full" />
+                  <Skeleton className="h-3.5 w-4/5" />
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Give us a few seconds — we read the photo, the copy and the review language before we
+              write anything.
+            </p>
+          </div>
         )}
+
       </div>
     </div>
   );
@@ -405,7 +423,7 @@ function CreateAd() {
               <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
                 Campaign objective
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
                 {objectives.map((o) => (
                   <button
                     key={o.id}
@@ -503,7 +521,7 @@ function CreateAd() {
                   We generate more than you need, because the first couple are always warm-ups —
                   pick your favourites and bin the rest.
                 </p>
-                <div className="mt-5 flex gap-3">
+                <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
                   {[3, 5, 10].map((n) => (
                     <button
                       key={n}
@@ -533,7 +551,17 @@ function CreateAd() {
               </div>
             ) : null}
 
-            {generating ? <GenerationProgress count={batch} /> : null}
+            {generating ? (
+              <>
+                <GenerationProgress count={batch} />
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {Array.from({ length: batch }, (_, i) => (
+                    <AdCardSkeleton key={i} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+
 
             {results.length > 0 && !generating ? (
               <>
