@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { signAdImages } from "@/lib/ai.functions";
-import type { Ad, AdFormat, ObjectiveId, Platform, ThemeId } from "@/data/studio";
+import type { Ad, AdFormat, AdOverlay, ObjectiveId, Platform, ThemeId } from "@/data/studio";
 
 type Row = {
   id: string;
@@ -18,6 +18,7 @@ type Row = {
   headline: string;
   caption: string;
   cta: string;
+  overlay: AdOverlay | null;
   favorite: boolean;
   collection_ids: string[];
 };
