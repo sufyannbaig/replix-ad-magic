@@ -3,9 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, Lightbulb, Plus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
+import { AdCardSkeleton } from "@/components/AdCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+
 import {
   formats,
   generateConcepts,
@@ -206,11 +209,26 @@ function UnderstandingStep({
             </ul>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Give us a few seconds — we read the photo, the copy and the review language before we
-            write anything.
-          </p>
+          <div className="card-soft p-6">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-8 w-8 rounded-lg" />
+              <Skeleton className="h-5 w-48" />
+            </div>
+            <div className="mt-4 space-y-3">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="space-y-2 rounded-xl bg-muted/70 p-3">
+                  <Skeleton className="h-3.5 w-full" />
+                  <Skeleton className="h-3.5 w-4/5" />
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Give us a few seconds — we read the photo, the copy and the review language before we
+              write anything.
+            </p>
+          </div>
         )}
+
       </div>
     </div>
   );
