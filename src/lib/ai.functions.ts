@@ -13,6 +13,14 @@ export type ProductAnalysis = {
   visualNotes: string;
 };
 
+/** Short on-image sell copy, rendered as an HTML/CSS text layer over the ad image. */
+export type AdOverlayCopy = {
+  hero: string;
+  support?: string;
+  attribution?: string;
+  badge?: string;
+};
+
 export type ConceptCopy = {
   theme: string;
   audience: string;
@@ -21,6 +29,7 @@ export type ConceptCopy = {
   caption: string;
   cta: string;
   imageBrief: string;
+  overlay?: AdOverlayCopy;
 };
 
 const CHAT_MODEL = "openai/gpt-5.6-sol";
