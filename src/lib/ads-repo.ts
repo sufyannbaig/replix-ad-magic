@@ -83,6 +83,7 @@ export async function saveAd(ad: Ad): Promise<Ad> {
       headline: ad.headline,
       caption: ad.caption,
       cta: ad.cta,
+      overlay: ad.overlay ?? null,
       favorite: ad.favorite,
       collection_ids: ad.collectionIds,
     })
