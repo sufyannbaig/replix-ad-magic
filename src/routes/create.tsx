@@ -42,6 +42,17 @@ import { saveAd } from "@/lib/ads-repo";
 import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
+import themeShowcase from "@/assets/theme-showcase.jpg.asset.json";
+import themeStats from "@/assets/theme-stats.jpg.asset.json";
+import themeTestimonial from "@/assets/theme-testimonial.jpg.asset.json";
+import themeUsVsThem from "@/assets/theme-us-vs-them.jpg.asset.json";
+
+const themeThumbs: Record<ThemeId, string> = {
+  showcase: themeShowcase.url,
+  stats: themeStats.url,
+  testimonial: themeTestimonial.url,
+  "us-vs-them": themeUsVsThem.url,
+};
 
 export const Route = createFileRoute("/create")({
   head: () => ({
@@ -838,6 +849,14 @@ function CreateAd() {
                           <Plus className="h-3.5 w-3.5" />
                         )}
                       </span>
+                      <img
+                        src={themeThumbs[t.id]}
+                        alt={`${t.label} ad example`}
+                        loading="lazy"
+                        width={106}
+                        height={111}
+                        className="h-16 w-16 shrink-0 rounded-lg border border-border object-cover"
+                      />
                       <span>
                         <span className="block font-display font-semibold">{t.label}</span>
                         <span className="text-sm text-muted-foreground">{t.logic}</span>
