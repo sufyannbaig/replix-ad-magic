@@ -60,7 +60,8 @@ export async function gatewayImage(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-3-pro-image",
+      // Nano Banana (Gemini flash image) — product-preserving image-to-image recomposition.
+      model: "google/gemini-3.1-flash-image",
       modalities: ["image", "text"],
       messages: [{ role: "user", content }],
     }),
