@@ -849,6 +849,14 @@ function CreateAd() {
                           <Plus className="h-3.5 w-3.5" />
                         )}
                       </span>
+                      <img
+                        src={themeThumbs[t.id]}
+                        alt={`${t.label} ad example`}
+                        loading="lazy"
+                        width={106}
+                        height={111}
+                        className="h-16 w-16 shrink-0 rounded-lg border border-border object-cover"
+                      />
                       <span>
                         <span className="block font-display font-semibold">{t.label}</span>
                         <span className="text-sm text-muted-foreground">{t.logic}</span>
