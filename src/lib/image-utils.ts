@@ -33,6 +33,12 @@ export async function urlToDataUrl(src: string): Promise<string> {
 
 /** Turn an uploaded file into a compact data URL. */
 export async function fileToDataUrl(file: File): Promise<string> {
+  if (file.size > MAX_UPLOAD_BYTES) {
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    throw new Error(
+      `That image is ${mb}MB. Please upload a photo of ${MAX_UPLOAD_LABEL} or less.`,
+    );
+  }
   const objectUrl = URL.createObjectURL(file);
   try {
     const img = await loadImage(objectUrl);
