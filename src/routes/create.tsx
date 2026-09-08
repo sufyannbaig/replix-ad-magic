@@ -98,7 +98,7 @@ export const Route = createFileRoute("/create")({
   component: CreateAd,
 });
 
-const stepLabels = ["Pick a product", "Understanding your product", "Choose your angle", "Generate"];
+const stepLabels = ["Pick a product", "Create a new ad"];
 
 /** What we are making ads for: a catalogue product or an uploaded photo. */
 type Subject = {
@@ -114,7 +114,7 @@ type Subject = {
 
 function StepRail({ step }: { step: number }) {
   return (
-    <div className="card-soft flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+    <div className="flex items-center gap-3">
       {stepLabels.map((label, i) => {
         const n = i + 1;
         const done = step > n;
@@ -125,18 +125,18 @@ function StepRail({ step }: { step: number }) {
               className={cn(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
                 done
-                  ? "bg-success text-navy-foreground"
+                  ? "bg-navy text-navy-foreground"
                   : active
-                    ? "bg-gold text-primary-foreground"
-                    : "bg-muted text-muted-foreground",
+                    ? "bg-navy text-navy-foreground"
+                    : "bg-muted text-muted-foreground/60",
               )}
             >
               {done ? <Check className="h-4 w-4" /> : n}
             </span>
             <span
               className={cn(
-                "text-sm",
-                active ? "font-semibold text-foreground" : "text-muted-foreground",
+                "text-sm whitespace-nowrap",
+                active || done ? "font-semibold text-foreground" : "text-muted-foreground/60",
               )}
             >
               {label}
@@ -150,6 +150,7 @@ function StepRail({ step }: { step: number }) {
     </div>
   );
 }
+
 
 /** One labelled, inline-editable field of the product summary card. */
 function SummaryField({
