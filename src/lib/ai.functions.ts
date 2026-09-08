@@ -234,7 +234,13 @@ FULLY RE-RENDER EVERYTHING ELSE: build a brand-new environment — different bac
 
 New scene direction: ${data.imageBrief}
 
-Studio-grade commercial photography quality. Compose so the product sits in the middle band of the frame with deliberately calm, uncluttered space across the top ~22% and bottom ~28% of the image, so a text band can later be laid over those areas without covering the product. Render NO added words anywhere in the image — no headline text, no captions, no watermarks, no borders. The only text allowed is the packaging text that already exists in the reference photo.`;
+Studio-grade commercial photography quality. Compose so the product sits in the middle band of the frame with deliberately calm, uncluttered space across the top ~22% and bottom ~28% of the image, reserved for the ad copy.
+
+${
+      data.overlay?.hero
+        ? typographyDirection(data.theme, data.overlay)
+        : "Render NO added words anywhere in the image — no headline text, no captions, no watermarks, no borders. The only text allowed is the packaging text that already exists in the reference photo."
+    }`;
 
     const b64 = await gatewayImage(prompt, data.imageDataUrl);
     const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
