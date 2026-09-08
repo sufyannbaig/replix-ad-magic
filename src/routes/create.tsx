@@ -1,10 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronRight,
+  Download,
   Loader2,
+  Share2,
   Sparkles,
   Lightbulb,
   Plus,
@@ -16,6 +19,7 @@ import {
   LayoutGrid,
   X,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
