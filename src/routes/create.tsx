@@ -621,9 +621,19 @@ function CreateAd() {
   );
 
   const runGeneration = async (count: number) => {
-    if (!subject || !objective || !analysis) return;
+    if (!subject || !analysis) {
+      setStep(subject ? 2 : 1);
+      toast.error("Pick a product or photo first so we have something to study.");
+      return;
+    }
+    if (!objective || themeIds.length === 0) {
+      setStep(3);
+      toast.error("Choose an objective and at least one creative theme.");
+      return;
+    }
     const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
+
 
     setGenerating(true);
     setGenError(null);
