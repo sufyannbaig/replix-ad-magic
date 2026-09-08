@@ -546,6 +546,8 @@ function CreateAd() {
             imageBrief,
             productName: draft.productName,
             format: draft.format,
+            theme: draft.theme,
+            ...(draft.overlay?.hero ? { overlay: draft.overlay } : {}),
           },
         });
         const withImage: Ad = { ...draft, image: signedUrl, imagePath: path };
@@ -661,6 +663,8 @@ function CreateAd() {
           imageBrief: concept.imageBrief,
           productName: subject.name,
           format: ad.format,
+          theme: ad.theme,
+          ...(concept.overlay?.hero ? { overlay: concept.overlay } : {}),
         },
       });
       const next: Ad = {
