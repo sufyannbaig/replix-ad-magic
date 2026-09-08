@@ -173,7 +173,50 @@ const imageInput = z.object({
   imageBrief: z.string().min(3),
   productName: z.string(),
   format: z.enum(["1:1", "4:5", "9:16"]),
+  theme: z.string().optional(),
+  overlay: z
+    .object({
+      hero: z.string(),
+      support: z.string().optional(),
+      attribution: z.string().optional(),
+      badge: z.string().optional(),
+    })
+    .optional(),
 });
+
+/** Theme-specific typography direction for text baked into the generated scene. */
+function typographyDirection(
+  theme: string | undefined,
+  overlay: {
+    hero: string;
+    support?: string | undefined;
+    attribution?: string | undefined;
+    badge?: string | undefined;
+  },
+): string {
+  const lines = [`Primary headline text (render EXACTLY, character for character): "${overlay.hero}"`];
+  if (overlay.support) lines.push(`Secondary supporting line: "${overlay.support}"`);
+  if (overlay.attribution) lines.push(`Attribution line, smaller: "${overlay.attribution}"`);
+  if (overlay.badge)
+    lines.push(`Small call-to-action badge/pill containing only: "${overlay.badge}"`);
+
+  const layout =
+    theme === "stats"
+      ? "Set the headline as one very large numeral-led statement filling the calm upper band, with the supporting line directly beneath it in a much smaller weight."
+      : theme === "testimonial"
+        ? "Set the quote in the calm band as a medium-large italic-free bold line, keeping the quotation marks, with the attribution beneath it in small letter-spaced capitals."
+        : theme === "us-vs-them"
+          ? "Set the comparison headline as a bold stacked two-line lockup in the calm lower band, with the contrast line beneath in a lighter smaller weight."
+          : "Set the headline as a bold single- or two-line lockup in the calm lower band, tight leading, generous margins.";
+
+  return `RENDER THIS SALES COPY INTO THE IMAGE as real, crisp typography that is part of the photograph's design (like a finished magazine or paid-social ad), not a sticker or watermark:
+${lines.join("\n")}
+
+${layout}
+Typography rules: bold, clean, geometric sans-serif; perfectly spelled exactly as given with no extra, missing, translated or invented words, no lorem ipsum, no duplicated text anywhere in the frame; high contrast and fully legible; place it only in the open, uncluttered space of the composition so it never overlaps, touches or obscures the product; add a subtle dark scrim, soft gradient or clean solid band behind the text only if needed for legibility.
+Colour guide: deep navy (#12213D) and warm gold (#E8A93B) as the brand accents, plus clean off-white (#FAF8F3) type where the scene is dark — use whichever of these reads best against the background, with the badge in gold with navy or off-white lettering.
+Do not add ANY other words, logos, slogans, prices, URLs, borders or watermarks beyond the copy listed above and the packaging text that already exists in the reference photo.`;
+}
 
 export const renderAdImage = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => imageInput.parse(data))
@@ -196,7 +239,13 @@ FULLY RE-RENDER EVERYTHING ELSE: build a brand-new environment — different bac
 
 New scene direction: ${data.imageBrief}
 
-Studio-grade commercial photography quality. Compose so the product sits in the middle band of the frame with deliberately calm, uncluttered space across the top ~22% and bottom ~28% of the image, so a text band can later be laid over those areas without covering the product. Render NO added words anywhere in the image — no headline text, no captions, no watermarks, no borders. The only text allowed is the packaging text that already exists in the reference photo.`;
+Studio-grade commercial photography quality. Compose so the product sits in the middle band of the frame with deliberately calm, uncluttered space across the top ~22% and bottom ~28% of the image, reserved for the ad copy.
+
+${
+      data.overlay?.hero
+        ? typographyDirection(data.theme, data.overlay)
+        : "Render NO added words anywhere in the image — no headline text, no captions, no watermarks, no borders. The only text allowed is the packaging text that already exists in the reference photo."
+    }`;
 
     const b64 = await gatewayImage(prompt, data.imageDataUrl);
     const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
