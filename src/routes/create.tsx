@@ -873,83 +873,15 @@ function CreateAd() {
             <div>
               <h2 className="font-display text-xl font-semibold">Choose your angle</h2>
               <p className="text-sm text-muted-foreground">
-                One campaign objective, up to three creative themes.
+                Pick up to three creative themes — each one sets the story the ad tells.
               </p>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                Campaign objective
-              </p>
-              <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
-                {objectives.map((o) => (
-                  <button
-                    key={o.id}
-                    onClick={() => setObjective(o.id)}
-                    className={cn(
-                      "rounded-xl border px-4 py-3 text-left transition-colors",
-                      objective === o.id
-                        ? "border-primary bg-gold-soft"
-                        : "border-border bg-card hover:border-primary/50",
-                    )}
-                  >
-                    <p className="text-sm font-semibold">{o.label}</p>
-                    <p className="text-xs text-muted-foreground">{o.blurb}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                  Creative themes
-                </p>
-                <span className="text-xs text-muted-foreground">{themeIds.length} of 3 chosen</span>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {themes.map((t) => {
-                  const selected = themeIds.includes(t.id);
-                  return (
-                    <button
-                      key={t.id}
-                      onClick={() => toggleTheme(t.id)}
-                      className={cn(
-                        "card-soft flex items-start gap-3 p-5 text-left transition-all hover:shadow-lift",
-                        selected && "ring-2 ring-primary",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-                          selected
-                            ? "bg-success text-navy-foreground"
-                            : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {selected ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : (
-                          <Plus className="h-3.5 w-3.5" />
-                        )}
-                      </span>
-                      <img
-                        src={themeThumbs[t.id]}
-                        alt={`${t.label} ad example`}
-                        loading="lazy"
-                        width={106}
-                        height={111}
-                        className="h-16 w-16 shrink-0 rounded-lg border border-border object-cover"
-                      />
-                      <span>
-                        <span className="block font-display font-semibold">{t.label}</span>
-                        <span className="text-sm text-muted-foreground">{t.logic}</span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <ThemePicker
+              themeIds={themeIds}
+              onToggle={toggleTheme}
+              onClear={() => setThemeIds([])}
+            />
 
             <div className="space-y-3">
               <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Format</p>
