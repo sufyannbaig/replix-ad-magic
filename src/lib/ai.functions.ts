@@ -179,7 +179,7 @@ Every concept must use a different scene in imageBrief and a different headline.
   });
 
 const imageInput = z.object({
-  imageDataUrl: z.string().min(30),
+  imageDataUrl: modelImage,
   imageBrief: z.string().min(3),
   productName: z.string(),
   format: z.enum(["1:1", "4:5", "9:16"]),
