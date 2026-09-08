@@ -410,7 +410,7 @@ function UnderstandingStep({
               <SummaryField
                 label="Product highlights"
                 list
-                value={(analysis.highlights.length ? analysis.highlights : analysis.insights).join(
+                value={(analysis.highlights?.length ? analysis.highlights : (analysis.insights ?? [])).join(
                   "\n",
                 )}
                 onSave={(next) =>
@@ -425,17 +425,17 @@ function UnderstandingStep({
               />
               <SummaryField
                 label="Ideal customer"
-                value={analysis.idealCustomer || analysis.audiences[0] || ""}
+                value={analysis.idealCustomer || analysis.audiences?.[0] || ""}
                 onSave={(next) => onAnalysed({ ...analysis, idealCustomer: next.trim() })}
               />
               <SummaryField
                 label="Pain point"
-                value={analysis.painPoint}
+                value={analysis.painPoint ?? ""}
                 onSave={(next) => onAnalysed({ ...analysis, painPoint: next.trim() })}
               />
               <SummaryField
                 label="Customer need"
-                value={analysis.customerNeed || analysis.sellingAngle}
+                value={analysis.customerNeed || analysis.sellingAngle || ""}
                 onSave={(next) => onAnalysed({ ...analysis, customerNeed: next.trim() })}
               />
             </div>
