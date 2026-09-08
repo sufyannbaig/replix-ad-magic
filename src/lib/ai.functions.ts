@@ -187,7 +187,12 @@ const imageInput = z.object({
 /** Theme-specific typography direction for text baked into the generated scene. */
 function typographyDirection(
   theme: string | undefined,
-  overlay: { hero: string; support?: string; attribution?: string; badge?: string },
+  overlay: {
+    hero: string;
+    support?: string | undefined;
+    attribution?: string | undefined;
+    badge?: string | undefined;
+  },
 ): string {
   const lines = [`Primary headline text (render EXACTLY, character for character): "${overlay.hero}"`];
   if (overlay.support) lines.push(`Secondary supporting line: "${overlay.support}"`);
