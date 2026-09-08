@@ -12,6 +12,9 @@ import {
   Store,
   AlertTriangle,
   ImagePlus,
+  Pencil,
+  LayoutGrid,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -23,17 +26,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   formats,
-  objectives,
   products,
   store,
   themes,
   understandingSteps,
   type Ad,
   type AdFormat,
-  type ObjectiveId,
   type Platform,
   type ThemeId,
 } from "@/data/studio";
@@ -42,17 +51,33 @@ import { saveAd } from "@/lib/ads-repo";
 import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
-import themeShowcase from "@/assets/theme-showcase.jpg.asset.json";
-import themeStats from "@/assets/theme-stats.jpg.asset.json";
-import themeTestimonial from "@/assets/theme-testimonial.jpg.asset.json";
-import themeUsVsThem from "@/assets/theme-us-vs-them.jpg.asset.json";
+import themeBeforeAfter from "@/assets/theme-before-after.jpg";
+import themeBoldClaim from "@/assets/theme-bold-claim.jpg";
+import themeFeatureBenefit from "@/assets/theme-feature-benefit.jpg";
+import themeHeadline from "@/assets/theme-headline.jpg";
+import themeOfferSale from "@/assets/theme-offer-sale.jpg";
+import themeProblemSolution from "@/assets/theme-problem-solution.jpg";
+import themeShowcase from "@/assets/theme-showcase.jpg";
+import themeStats from "@/assets/theme-stats.jpg";
+import themeTestimonial from "@/assets/theme-testimonial.jpg";
+import themeUsVsThem from "@/assets/theme-us-vs-them.jpg";
 
+/** Original, generated example previews — one per creative theme. */
 const themeThumbs: Record<ThemeId, string> = {
-  showcase: themeShowcase.url,
-  stats: themeStats.url,
-  testimonial: themeTestimonial.url,
-  "us-vs-them": themeUsVsThem.url,
+  "before-after": themeBeforeAfter,
+  "bold-claim": themeBoldClaim,
+  "feature-benefit": themeFeatureBenefit,
+  headline: themeHeadline,
+  "offer-sale": themeOfferSale,
+  "problem-solution": themeProblemSolution,
+  showcase: themeShowcase,
+  stats: themeStats,
+  testimonial: themeTestimonial,
+  "us-vs-them": themeUsVsThem,
 };
+
+/** Objective is no longer chosen in the wizard — the creative theme carries the intent. */
+const DEFAULT_OBJECTIVE = "awareness" as const;
 
 export const Route = createFileRoute("/create")({
   head: () => ({
