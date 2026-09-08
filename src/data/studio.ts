@@ -29,7 +29,17 @@ export const adScenes = [
 export type Platform = "instagram" | "facebook";
 export type AdFormat = "1:1" | "4:5" | "9:16";
 
-export type ThemeId = "showcase" | "stats" | "testimonial" | "us-vs-them";
+export type ThemeId =
+  | "before-after"
+  | "bold-claim"
+  | "feature-benefit"
+  | "headline"
+  | "offer-sale"
+  | "problem-solution"
+  | "showcase"
+  | "stats"
+  | "testimonial"
+  | "us-vs-them";
 export type ObjectiveId = "launch" | "sale" | "collection" | "awareness" | "retargeting";
 
 export const objectives: { id: ObjectiveId; label: string; blurb: string }[] = [
@@ -41,10 +51,16 @@ export const objectives: { id: ObjectiveId; label: string; blurb: string }[] = [
 ];
 
 export const themes: { id: ThemeId; label: string; logic: string }[] = [
+  { id: "before-after", label: "Before & After", logic: "Show the change, not the claim" },
+  { id: "bold-claim", label: "Bold Claim", logic: "One big promise, said plainly" },
+  { id: "feature-benefit", label: "Feature & Benefit", logic: "Turn specs into reasons to buy" },
+  { id: "headline", label: "Headline", logic: "One line does all the work" },
+  { id: "offer-sale", label: "Offer & Sale", logic: "Give a reason to move now" },
+  { id: "problem-solution", label: "Problem & Solution", logic: "Name the pain, then fix it" },
   { id: "showcase", label: "Product Showcase", logic: "Let the product be the hero" },
   { id: "stats", label: "Statistics & Social Proof", logic: "Borrow trust from numbers" },
   { id: "testimonial", label: "Testimonial", logic: "Let a happy customer sell it" },
-  { id: "us-vs-them", label: "Us vs Them", logic: "Position against the old way" },
+  { id: "us-vs-them", label: "Us and Them", logic: "Position against the old way" },
 ];
 
 export const formats: { id: AdFormat; label: string }[] = [
