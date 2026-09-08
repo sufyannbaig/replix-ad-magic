@@ -52,7 +52,7 @@ import {
 } from "@/data/studio";
 import { analyzeProductImage, generateAdCopy, renderAdImage, type ProductAnalysis } from "@/lib/ai.functions";
 import { saveAd } from "@/lib/ads-repo";
-import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
+import { downloadImage, fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
 import themeBeforeAfter from "@/assets/theme-before-after.jpg";
