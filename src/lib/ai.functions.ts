@@ -182,6 +182,7 @@ The "overlay" object must be tailored to that concept's theme and is ALL-CAPS-fr
 - theme "stats": { "hero": ONE standout number or stat only, very short (e.g. "10,000+" or "92%"), "support": short supporting line of max 5 words (e.g. "Happy Customers"), "badge": optional 2-3 word badge }
 - theme "testimonial": { "hero": a short customer quote of max 12 words wrapped in double quotation marks, "attribution": a plausible customer first name plus last initial and "Verified Buyer" }
 - theme "us-vs-them": { "hero": punchy comparison headline of 3-6 words (e.g. "Why Settle For Less"), "support": short contrast line of max 6 words, "badge": optional 2-3 word badge like "Limited Time" }
+- any other theme: { "hero": bold 3-6 word headline that fits that theme, "support": optional short line of max 6 words, "badge": optional 2-3 word badge }
 Only invent numbers, quotes or names when the theme requires them; keep them modest and plausible, and prefer real figures from the analysis when available.
 Every concept must use a different scene in imageBrief and a different headline.`,
         },
