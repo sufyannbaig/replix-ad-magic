@@ -545,6 +545,13 @@ function CreateAd() {
     wizardCache.batchIndex = batchIndex.current;
   }, [step, mode, subject, analysis, objective, themeIds, format, batch, results]);
 
+  // Never sit on a step whose inputs are missing — that used to render a blank
+  // panel that looked like the wizard had reset itself.
+  useEffect(() => {
+    if (step > 1 && !subject) setStep(1);
+    else if (step > 2 && !analysis) setStep(2);
+  }, [step, subject, analysis]);
+
 
   const pickProduct = async (id: string) => {
     const product = products.find((p) => p.id === id);
