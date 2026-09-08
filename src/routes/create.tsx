@@ -806,8 +806,8 @@ function CreateAd() {
   // panel that looked like the wizard had reset itself.
   useEffect(() => {
     if (step > 1 && !subject) setStep(1);
-    else if (step > 2 && !analysis) setStep(2);
-  }, [step, subject, analysis]);
+  }, [step, subject]);
+
 
 
   const pickProduct = async (id: string) => {
