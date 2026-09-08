@@ -481,24 +481,77 @@ function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
   );
 }
 
+/**
+ * Wizard progress lives outside the component so a remount of the page (hot
+ * reload, a re-render of the shell, a stray error boundary reset) can never
+ * throw the user back to step 1 and lose the product, angle and results.
+ */
+type WizardCache = {
+  step: number;
+  mode: "product" | "upload";
+  subject: Subject | null;
+  analysis: ProductAnalysis | null;
+  objective: ObjectiveId | null;
+  themeIds: ThemeId[];
+  format: AdFormat;
+  batch: number;
+  results: Ad[];
+  batchIndex: number;
+};
+
+const wizardCache: WizardCache = {
+  step: 1,
+  mode: "product",
+  subject: null,
+  analysis: null,
+  objective: null,
+  themeIds: [],
+  format: "1:1",
+  batch: 5,
+  results: [],
+  batchIndex: 0,
+};
+
 function CreateAd() {
   const { addAds, replaceAd, removeAd, spendCredits } = useStudio();
-  const [step, setStep] = useState(1);
-  const [mode, setMode] = useState<"product" | "upload">("product");
-  const [subject, setSubject] = useState<Subject | null>(null);
+  const [step, setStep] = useState(wizardCache.step);
+  const [mode, setMode] = useState<"product" | "upload">(wizardCache.mode);
+  const [subject, setSubject] = useState<Subject | null>(wizardCache.subject);
   const [preparing, setPreparing] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<ProductAnalysis | null>(null);
-  const [objective, setObjective] = useState<ObjectiveId | null>(null);
-  const [themeIds, setThemeIds] = useState<ThemeId[]>([]);
-  const [format, setFormat] = useState<AdFormat>("1:1");
-  const [batch, setBatch] = useState(5);
+  const [analysis, setAnalysis] = useState<ProductAnalysis | null>(wizardCache.analysis);
+  const [objective, setObjective] = useState<ObjectiveId | null>(wizardCache.objective);
+  const [themeIds, setThemeIds] = useState<ThemeId[]>(wizardCache.themeIds);
+  const [format, setFormat] = useState<AdFormat>(wizardCache.format);
+  const [batch, setBatch] = useState(wizardCache.batch);
   const [generating, setGenerating] = useState(false);
   const [copyDone, setCopyDone] = useState(false);
   const [imagesDone, setImagesDone] = useState(0);
   const [pending, setPending] = useState(0);
-  const [results, setResults] = useState<Ad[]>([]);
+  const [results, setResults] = useState<Ad[]>(wizardCache.results);
   const [genError, setGenError] = useState<string | null>(null);
-  const batchIndex = useRef(0);
+  const batchIndex = useRef(wizardCache.batchIndex);
+
+  // Mirror every choice out to the cache so it survives a remount.
+  useEffect(() => {
+    wizardCache.step = step;
+    wizardCache.mode = mode;
+    wizardCache.subject = subject;
+    wizardCache.analysis = analysis;
+    wizardCache.objective = objective;
+    wizardCache.themeIds = themeIds;
+    wizardCache.format = format;
+    wizardCache.batch = batch;
+    wizardCache.results = results;
+    wizardCache.batchIndex = batchIndex.current;
+  }, [step, mode, subject, analysis, objective, themeIds, format, batch, results]);
+
+  // Never sit on a step whose inputs are missing — that used to render a blank
+  // panel that looked like the wizard had reset itself.
+  useEffect(() => {
+    if (step > 1 && !subject) setStep(1);
+    else if (step > 2 && !analysis) setStep(2);
+  }, [step, subject, analysis]);
+
 
   const pickProduct = async (id: string) => {
     const product = products.find((p) => p.id === id);
@@ -568,9 +621,19 @@ function CreateAd() {
   );
 
   const runGeneration = async (count: number) => {
-    if (!subject || !objective || !analysis) return;
+    if (!subject || !analysis) {
+      setStep(subject ? 2 : 1);
+      toast.error("Pick a product or photo first so we have something to study.");
+      return;
+    }
+    if (!objective || themeIds.length === 0) {
+      setStep(3);
+      toast.error("Choose an objective and at least one creative theme.");
+      return;
+    }
     const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
+
 
     setGenerating(true);
     setGenError(null);
