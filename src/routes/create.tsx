@@ -481,24 +481,70 @@ function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
   );
 }
 
+/**
+ * Wizard progress lives outside the component so a remount of the page (hot
+ * reload, a re-render of the shell, a stray error boundary reset) can never
+ * throw the user back to step 1 and lose the product, angle and results.
+ */
+type WizardCache = {
+  step: number;
+  mode: "product" | "upload";
+  subject: Subject | null;
+  analysis: ProductAnalysis | null;
+  objective: ObjectiveId | null;
+  themeIds: ThemeId[];
+  format: AdFormat;
+  batch: number;
+  results: Ad[];
+  batchIndex: number;
+};
+
+const wizardCache: WizardCache = {
+  step: 1,
+  mode: "product",
+  subject: null,
+  analysis: null,
+  objective: null,
+  themeIds: [],
+  format: "1:1",
+  batch: 5,
+  results: [],
+  batchIndex: 0,
+};
+
 function CreateAd() {
   const { addAds, replaceAd, removeAd, spendCredits } = useStudio();
-  const [step, setStep] = useState(1);
-  const [mode, setMode] = useState<"product" | "upload">("product");
-  const [subject, setSubject] = useState<Subject | null>(null);
+  const [step, setStep] = useState(wizardCache.step);
+  const [mode, setMode] = useState<"product" | "upload">(wizardCache.mode);
+  const [subject, setSubject] = useState<Subject | null>(wizardCache.subject);
   const [preparing, setPreparing] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<ProductAnalysis | null>(null);
-  const [objective, setObjective] = useState<ObjectiveId | null>(null);
-  const [themeIds, setThemeIds] = useState<ThemeId[]>([]);
-  const [format, setFormat] = useState<AdFormat>("1:1");
-  const [batch, setBatch] = useState(5);
+  const [analysis, setAnalysis] = useState<ProductAnalysis | null>(wizardCache.analysis);
+  const [objective, setObjective] = useState<ObjectiveId | null>(wizardCache.objective);
+  const [themeIds, setThemeIds] = useState<ThemeId[]>(wizardCache.themeIds);
+  const [format, setFormat] = useState<AdFormat>(wizardCache.format);
+  const [batch, setBatch] = useState(wizardCache.batch);
   const [generating, setGenerating] = useState(false);
   const [copyDone, setCopyDone] = useState(false);
   const [imagesDone, setImagesDone] = useState(0);
   const [pending, setPending] = useState(0);
-  const [results, setResults] = useState<Ad[]>([]);
+  const [results, setResults] = useState<Ad[]>(wizardCache.results);
   const [genError, setGenError] = useState<string | null>(null);
-  const batchIndex = useRef(0);
+  const batchIndex = useRef(wizardCache.batchIndex);
+
+  // Mirror every choice out to the cache so it survives a remount.
+  useEffect(() => {
+    wizardCache.step = step;
+    wizardCache.mode = mode;
+    wizardCache.subject = subject;
+    wizardCache.analysis = analysis;
+    wizardCache.objective = objective;
+    wizardCache.themeIds = themeIds;
+    wizardCache.format = format;
+    wizardCache.batch = batch;
+    wizardCache.results = results;
+    wizardCache.batchIndex = batchIndex.current;
+  }, [step, mode, subject, analysis, objective, themeIds, format, batch, results]);
+
 
   const pickProduct = async (id: string) => {
     const product = products.find((p) => p.id === id);
