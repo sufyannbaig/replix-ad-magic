@@ -11,6 +11,11 @@ export type ProductAnalysis = {
   audiences: string[];
   sellingAngle: string;
   visualNotes: string;
+  /** Editable summary shown on the "Understanding your product" step. */
+  highlights: string[];
+  idealCustomer: string;
+  painPoint: string;
+  customerNeed: string;
 };
 
 /** Short on-image sell copy, rendered as an HTML/CSS text layer over the ad image. */
@@ -79,7 +84,7 @@ export const analyzeProductImage = createServerFn({ method: "POST" })
           content: [
             {
               type: "text",
-              text: `${brief}\n\nStudy this product photo and return JSON with exactly these keys:\n{\n  "productType": short description of what the product is,\n  "colors": 3-5 specific colours actually visible (packaging and scene),\n  "materials": 2-4 materials/finishes visible (e.g. matte plastic, glass, kraft paper),\n  "visibleText": every piece of text you can actually read on the packaging (empty array if none legible),\n  "claims": claims or badges visible on the pack (empty array if none),\n  "insights": 4 short, specific selling-point insights a strategist would write after looking at this photo, each one sentence, grounded in what you saw,\n  "audiences": 3 concrete best-fit audience descriptions,\n  "sellingAngle": the single strongest selling angle in one sentence,\n  "visualNotes": one sentence on how this product photographs best (lighting, backdrop, tones)\n}`,
+              text: `${brief}\n\nStudy this product photo and return JSON with exactly these keys:\n{\n  "productType": short description of what the product is,\n  "colors": 3-5 specific colours actually visible (packaging and scene),\n  "materials": 2-4 materials/finishes visible (e.g. matte plastic, glass, kraft paper),\n  "visibleText": every piece of text you can actually read on the packaging (empty array if none legible),\n  "claims": claims or badges visible on the pack (empty array if none),\n  "insights": 4 short, specific selling-point insights a strategist would write after looking at this photo, each one sentence, grounded in what you saw,\n  "audiences": 3 concrete best-fit audience descriptions,\n  "sellingAngle": the single strongest selling angle in one sentence,\n  "visualNotes": one sentence on how this product photographs best (lighting, backdrop, tones),\n  "highlights": 4-5 short concrete selling points pulled from what you can see (max 14 words each),\n  "idealCustomer": one or two sentences describing exactly who this product is for,\n  "painPoint": one sentence on the problem this product solves,\n  "customerNeed": one sentence on what the customer is actually looking for\n}`,
             },
             { type: "image_url", image_url: { url: data.imageDataUrl } },
           ],
@@ -98,6 +103,10 @@ export const analyzeProductImage = createServerFn({ method: "POST" })
       audiences: (parsed.audiences ?? []).slice(0, 3),
       sellingAngle: parsed.sellingAngle ?? "",
       visualNotes: parsed.visualNotes ?? "",
+      highlights: (parsed.highlights ?? []).slice(0, 5),
+      idealCustomer: parsed.idealCustomer ?? "",
+      painPoint: parsed.painPoint ?? "",
+      customerNeed: parsed.customerNeed ?? "",
     };
   });
 
@@ -112,12 +121,16 @@ const copyInput = z.object({
     audiences: z.array(z.string()),
     sellingAngle: z.string(),
     visualNotes: z.string(),
+    highlights: z.array(z.string()).optional(),
+    idealCustomer: z.string().optional(),
+    painPoint: z.string().optional(),
+    customerNeed: z.string().optional(),
   }),
   productName: z.string(),
   price: z.number().optional(),
   storeName: z.string().optional(),
-  objective: z.string(),
-  objectiveLabel: z.string(),
+  objective: z.string().optional(),
+  objectiveLabel: z.string().optional(),
   themes: z.array(z.object({ id: z.string(), label: z.string(), logic: z.string() })).min(1),
   format: z.string(),
   count: z.number().min(1).max(10),
@@ -152,10 +165,13 @@ What the photo analysis found:
 - Insights: ${a.insights.join(" ")}
 - Audiences: ${a.audiences.join(" | ")}
 - Strongest angle: ${a.sellingAngle}
+- Highlights: ${(a.highlights ?? []).join(" | ")}
+- Ideal customer: ${a.idealCustomer ?? ""}
+- Pain point: ${a.painPoint ?? ""}
+- Customer need: ${a.customerNeed ?? ""}
 - Photographs best: ${a.visualNotes}
 
-Campaign objective: ${data.objectiveLabel}.
-Creative themes to rotate through (use each in turn): ${data.themes.map((t) => `${t.label} (${t.logic})`).join("; ")}.
+${data.objectiveLabel ? `Campaign objective: ${data.objectiveLabel}.\n` : ""}Creative themes to rotate through (use each in turn): ${data.themes.map((t) => `${t.label} (${t.logic})`).join("; ")}.
 Ad format: ${data.format}.
 Variation batch: ${data.variantSeed ?? 0} — make these distinct from earlier batches.
 
@@ -166,6 +182,7 @@ The "overlay" object must be tailored to that concept's theme and is ALL-CAPS-fr
 - theme "stats": { "hero": ONE standout number or stat only, very short (e.g. "10,000+" or "92%"), "support": short supporting line of max 5 words (e.g. "Happy Customers"), "badge": optional 2-3 word badge }
 - theme "testimonial": { "hero": a short customer quote of max 12 words wrapped in double quotation marks, "attribution": a plausible customer first name plus last initial and "Verified Buyer" }
 - theme "us-vs-them": { "hero": punchy comparison headline of 3-6 words (e.g. "Why Settle For Less"), "support": short contrast line of max 6 words, "badge": optional 2-3 word badge like "Limited Time" }
+- any other theme: { "hero": bold 3-6 word headline that fits that theme, "support": optional short line of max 6 words, "badge": optional 2-3 word badge }
 Only invent numbers, quotes or names when the theme requires them; keep them modest and plausible, and prefer real figures from the analysis when available.
 Every concept must use a different scene in imageBrief and a different headline.`,
         },

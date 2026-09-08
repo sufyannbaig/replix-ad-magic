@@ -12,6 +12,9 @@ import {
   Store,
   AlertTriangle,
   ImagePlus,
+  Pencil,
+  LayoutGrid,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -23,17 +26,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   formats,
-  objectives,
   products,
   store,
   themes,
   understandingSteps,
   type Ad,
   type AdFormat,
-  type ObjectiveId,
   type Platform,
   type ThemeId,
 } from "@/data/studio";
@@ -42,17 +51,33 @@ import { saveAd } from "@/lib/ads-repo";
 import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
-import themeShowcase from "@/assets/theme-showcase.jpg.asset.json";
-import themeStats from "@/assets/theme-stats.jpg.asset.json";
-import themeTestimonial from "@/assets/theme-testimonial.jpg.asset.json";
-import themeUsVsThem from "@/assets/theme-us-vs-them.jpg.asset.json";
+import themeBeforeAfter from "@/assets/theme-before-after.jpg";
+import themeBoldClaim from "@/assets/theme-bold-claim.jpg";
+import themeFeatureBenefit from "@/assets/theme-feature-benefit.jpg";
+import themeHeadline from "@/assets/theme-headline.jpg";
+import themeOfferSale from "@/assets/theme-offer-sale.jpg";
+import themeProblemSolution from "@/assets/theme-problem-solution.jpg";
+import themeShowcase from "@/assets/theme-showcase.jpg";
+import themeStats from "@/assets/theme-stats.jpg";
+import themeTestimonial from "@/assets/theme-testimonial.jpg";
+import themeUsVsThem from "@/assets/theme-us-vs-them.jpg";
 
+/** Original, generated example previews — one per creative theme. */
 const themeThumbs: Record<ThemeId, string> = {
-  showcase: themeShowcase.url,
-  stats: themeStats.url,
-  testimonial: themeTestimonial.url,
-  "us-vs-them": themeUsVsThem.url,
+  "before-after": themeBeforeAfter,
+  "bold-claim": themeBoldClaim,
+  "feature-benefit": themeFeatureBenefit,
+  headline: themeHeadline,
+  "offer-sale": themeOfferSale,
+  "problem-solution": themeProblemSolution,
+  showcase: themeShowcase,
+  stats: themeStats,
+  testimonial: themeTestimonial,
+  "us-vs-them": themeUsVsThem,
 };
+
+/** Objective is no longer chosen in the wizard — the creative theme carries the intent. */
+const DEFAULT_OBJECTIVE = "awareness" as const;
 
 export const Route = createFileRoute("/create")({
   head: () => ({
@@ -126,16 +151,106 @@ function StepRail({ step }: { step: number }) {
   );
 }
 
+/** One labelled, inline-editable field of the product summary card. */
+function SummaryField({
+  label,
+  value,
+  list,
+  onSave,
+}: {
+  label: string;
+  value: string;
+  list?: boolean;
+  onSave: (next: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  const start = () => {
+    setDraft(value);
+    setEditing(true);
+  };
+  const save = () => {
+    onSave(draft);
+    setEditing(false);
+  };
+
+  const lines = value
+    .split("\n")
+    .map((l) => l.replace(/^[-•\s]+/, "").trim())
+    .filter(Boolean);
+
+  return (
+    <div className="rounded-xl border border-border bg-muted/50 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs font-semibold tracking-[0.14em] text-navy uppercase">{label}</p>
+        {editing ? null : (
+          <button
+            onClick={start}
+            aria-label={`Edit ${label}`}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-gold-soft hover:text-navy"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="mt-2 space-y-2">
+          <Textarea
+            value={draft}
+            rows={list ? 6 : 3}
+            onChange={(e) => setDraft(e.target.value)}
+            aria-label={`${label} text`}
+          />
+          {list ? (
+            <p className="text-xs text-muted-foreground">One selling point per line.</p>
+          ) : null}
+          <div className="flex gap-2">
+            <Button size="sm" onClick={save}>
+              Save
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : list ? (
+        <ul className="mt-2 space-y-2">
+          {lines.length ? (
+            lines.map((line) => (
+              <li key={line} className="flex gap-2">
+                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
+                <span className="text-sm leading-relaxed">{line}</span>
+              </li>
+            ))
+          ) : (
+            <li className="text-sm text-muted-foreground">Nothing yet — add your own.</li>
+          )}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm leading-relaxed">
+          {value || <span className="text-muted-foreground">Nothing yet — add your own.</span>}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /* ---------- Step 2: the study moment, now a real photo analysis ---------- */
 
 function UnderstandingStep({
   subject,
   analysis,
   onAnalysed,
+  onChangeProduct,
+  onDeleteProduct,
 }: {
   subject: Subject;
   analysis: ProductAnalysis | null;
   onAnalysed: (analysis: ProductAnalysis) => void;
+  onChangeProduct: () => void;
+  onDeleteProduct: () => void;
 }) {
   const [completed, setCompleted] = useState(analysis ? understandingSteps.length : 0);
   const [error, setError] = useState<string | null>(null);
@@ -201,6 +316,19 @@ function UnderstandingStep({
           {subject.price !== undefined ? (
             <p className="text-sm text-muted-foreground">${subject.price.toFixed(2)}</p>
           ) : null}
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="outline" onClick={onChangeProduct}>
+              Change
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-destructive hover:text-destructive"
+              onClick={onDeleteProduct}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -271,16 +399,46 @@ function UnderstandingStep({
               <span className="rounded-lg bg-gold-soft p-2 text-navy">
                 <Lightbulb className="h-4 w-4" />
               </span>
-              <h3 className="font-display text-lg font-semibold">Here's what we found</h3>
+              <div>
+                <h3 className="font-display text-lg font-semibold">Here's what we found</h3>
+                <p className="text-xs text-muted-foreground">
+                  Edit anything that isn't quite right before you continue.
+                </p>
+              </div>
             </div>
-            <ul className="mt-4 space-y-3">
-              {analysis.insights.map((insight) => (
-                <li key={insight} className="flex gap-3 rounded-xl bg-muted/70 p-3">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                  <p className="text-sm leading-relaxed">{insight}</p>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-4 max-h-[26rem] space-y-3 overflow-y-auto pr-1">
+              <SummaryField
+                label="Product highlights"
+                list
+                value={(analysis.highlights?.length ? analysis.highlights : (analysis.insights ?? [])).join(
+                  "\n",
+                )}
+                onSave={(next) =>
+                  onAnalysed({
+                    ...analysis,
+                    highlights: next
+                      .split("\n")
+                      .map((l) => l.replace(/^[-•\s]+/, "").trim())
+                      .filter(Boolean),
+                  })
+                }
+              />
+              <SummaryField
+                label="Ideal customer"
+                value={analysis.idealCustomer || analysis.audiences?.[0] || ""}
+                onSave={(next) => onAnalysed({ ...analysis, idealCustomer: next.trim() })}
+              />
+              <SummaryField
+                label="Pain point"
+                value={analysis.painPoint ?? ""}
+                onSave={(next) => onAnalysed({ ...analysis, painPoint: next.trim() })}
+              />
+              <SummaryField
+                label="Customer need"
+                value={analysis.customerNeed || analysis.sellingAngle || ""}
+                onSave={(next) => onAnalysed({ ...analysis, customerNeed: next.trim() })}
+              />
+            </div>
             {analysis.colors.length || analysis.materials.length || analysis.visibleText.length ? (
               <div className="mt-4 space-y-2 rounded-xl bg-muted/50 p-3 text-xs">
                 {analysis.colors.length ? (
@@ -381,6 +539,137 @@ function GenerationProgress({
       <p className="mt-4 text-xs text-muted-foreground">
         Real image generation takes a little while — cards fill in as each one lands.
       </p>
+    </div>
+  );
+}
+
+
+/* ---------- Step 3: one unified creative-theme picker ---------- */
+
+function ThemePicker({
+  themeIds,
+  onToggle,
+  onClear,
+}: {
+  themeIds: ThemeId[];
+  onToggle: (id: ThemeId) => void;
+  onClear: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const chosen = themes.filter((t) => themeIds.includes(t.id));
+  const preview = chosen.length ? chosen : themes.slice(0, 3);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Creative theme</p>
+        <span className="text-xs text-muted-foreground">{themeIds.length} of 3 chosen</span>
+      </div>
+
+      <div className="card-soft flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
+        <div className="flex shrink-0 items-center">
+          {preview.map((t, i) => (
+            <img
+              key={t.id}
+              src={themeThumbs[t.id]}
+              alt={`${t.label} example`}
+              loading="lazy"
+              width={816}
+              height={816}
+              className={cn(
+                "h-20 w-20 rounded-xl border-2 border-card object-cover shadow-lift",
+                i > 0 && "-ml-8",
+              )}
+            />
+          ))}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          {chosen.length ? (
+            <div className="flex flex-wrap gap-2">
+              {chosen.map((t) => (
+                <Badge
+                  key={t.id}
+                  className="bg-gold-soft text-navy hover:bg-gold-soft"
+                  onClick={() => onToggle(t.id)}
+                >
+                  {t.label}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Ten ad styles to choose from — from a plain bold claim to a before-and-after.
+            </p>
+          )}
+        </div>
+
+        <div className="flex shrink-0 gap-2">
+          {chosen.length ? (
+            <Button variant="ghost" onClick={onClear}>
+              Clear
+            </Button>
+          ) : null}
+          <Button onClick={() => setOpen(true)}>
+            <LayoutGrid className="mr-1 h-4 w-4" /> Select creative theme
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="font-display">Creative themes</DialogTitle>
+            <DialogDescription>
+              Choose up to three. Each preview is an example of that style, not your ad.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {themes.map((t) => {
+              const selected = themeIds.includes(t.id);
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => onToggle(t.id)}
+                  className={cn(
+                    "card-soft overflow-hidden text-left transition-all hover:shadow-lift",
+                    selected && "ring-2 ring-primary",
+                  )}
+                >
+                  <div className="relative">
+                    <img
+                      src={themeThumbs[t.id]}
+                      alt={`${t.label} example`}
+                      loading="lazy"
+                      width={816}
+                      height={816}
+                      className="aspect-square w-full object-cover"
+                    />
+                    <span
+                      className={cn(
+                        "absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full",
+                        selected
+                          ? "bg-success text-navy-foreground"
+                          : "bg-card/90 text-muted-foreground",
+                      )}
+                    >
+                      {selected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    </span>
+                  </div>
+                  <div className="p-3">
+                    <p className="font-display text-sm font-semibold">{t.label}</p>
+                    <p className="text-xs text-muted-foreground">{t.logic}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setOpen(false)}>Done</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -491,7 +780,6 @@ type WizardCache = {
   mode: "product" | "upload";
   subject: Subject | null;
   analysis: ProductAnalysis | null;
-  objective: ObjectiveId | null;
   themeIds: ThemeId[];
   format: AdFormat;
   batch: number;
@@ -504,7 +792,6 @@ const wizardCache: WizardCache = {
   mode: "product",
   subject: null,
   analysis: null,
-  objective: null,
   themeIds: [],
   format: "1:1",
   batch: 5,
@@ -519,7 +806,6 @@ function CreateAd() {
   const [subject, setSubject] = useState<Subject | null>(wizardCache.subject);
   const [preparing, setPreparing] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<ProductAnalysis | null>(wizardCache.analysis);
-  const [objective, setObjective] = useState<ObjectiveId | null>(wizardCache.objective);
   const [themeIds, setThemeIds] = useState<ThemeId[]>(wizardCache.themeIds);
   const [format, setFormat] = useState<AdFormat>(wizardCache.format);
   const [batch, setBatch] = useState(wizardCache.batch);
@@ -537,13 +823,12 @@ function CreateAd() {
     wizardCache.mode = mode;
     wizardCache.subject = subject;
     wizardCache.analysis = analysis;
-    wizardCache.objective = objective;
     wizardCache.themeIds = themeIds;
     wizardCache.format = format;
     wizardCache.batch = batch;
     wizardCache.results = results;
     wizardCache.batchIndex = batchIndex.current;
-  }, [step, mode, subject, analysis, objective, themeIds, format, batch, results]);
+  }, [step, mode, subject, analysis, themeIds, format, batch, results]);
 
   // Never sit on a step whose inputs are missing — that used to render a blank
   // panel that looked like the wizard had reset itself.
@@ -626,12 +911,11 @@ function CreateAd() {
       toast.error("Pick a product or photo first so we have something to study.");
       return;
     }
-    if (!objective || themeIds.length === 0) {
+    if (themeIds.length === 0) {
       setStep(3);
-      toast.error("Choose an objective and at least one creative theme.");
+      toast.error("Choose at least one creative theme.");
       return;
     }
-    const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
 
 
@@ -648,8 +932,6 @@ function CreateAd() {
           productName: subject.name,
           ...(subject.price !== undefined ? { price: subject.price } : {}),
           storeName: subject.source === "shopify" ? store.name : undefined,
-          objective,
-          objectiveLabel,
           themes: chosenThemes,
           format,
           count,
@@ -667,7 +949,7 @@ function CreateAd() {
         format,
         theme: (chosenThemes.find((t) => t.id === concept.theme)?.id ??
           chosenThemes[i % chosenThemes.length]!.id) as ThemeId,
-        objective,
+        objective: DEFAULT_OBJECTIVE,
         image: "",
         source: subject.source,
         audience: concept.audience,
@@ -700,9 +982,8 @@ function CreateAd() {
   };
 
   const handleRegenerate = async (ad: Ad) => {
-    if (!subject || !objective || !analysis) return;
+    if (!subject || !analysis) return;
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
-    const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
     try {
       const [concept] = await generateAdCopy({
         data: {
@@ -710,8 +991,6 @@ function CreateAd() {
           productName: subject.name,
           ...(subject.price !== undefined ? { price: subject.price } : {}),
           storeName: subject.source === "shopify" ? store.name : undefined,
-          objective,
-          objectiveLabel,
           themes: chosenThemes.length ? chosenThemes : themes.slice(0, 1),
           format: ad.format,
           count: 1,
@@ -840,7 +1119,17 @@ function CreateAd() {
                 Before we write a single hook, we look at what you're actually selling.
               </p>
             </div>
-            <UnderstandingStep subject={subject} analysis={analysis} onAnalysed={setAnalysis} />
+            <UnderstandingStep
+              subject={subject}
+              analysis={analysis}
+              onAnalysed={setAnalysis}
+              onChangeProduct={() => setStep(1)}
+              onDeleteProduct={() => {
+                setSubject(null);
+                setAnalysis(null);
+                setStep(1);
+              }}
+            />
             <div className="flex items-center justify-between">
               <Button variant="ghost" onClick={() => setStep(1)}>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Change product
@@ -858,83 +1147,15 @@ function CreateAd() {
             <div>
               <h2 className="font-display text-xl font-semibold">Choose your angle</h2>
               <p className="text-sm text-muted-foreground">
-                One campaign objective, up to three creative themes.
+                Pick up to three creative themes — each one sets the story the ad tells.
               </p>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                Campaign objective
-              </p>
-              <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
-                {objectives.map((o) => (
-                  <button
-                    key={o.id}
-                    onClick={() => setObjective(o.id)}
-                    className={cn(
-                      "rounded-xl border px-4 py-3 text-left transition-colors",
-                      objective === o.id
-                        ? "border-primary bg-gold-soft"
-                        : "border-border bg-card hover:border-primary/50",
-                    )}
-                  >
-                    <p className="text-sm font-semibold">{o.label}</p>
-                    <p className="text-xs text-muted-foreground">{o.blurb}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                  Creative themes
-                </p>
-                <span className="text-xs text-muted-foreground">{themeIds.length} of 3 chosen</span>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {themes.map((t) => {
-                  const selected = themeIds.includes(t.id);
-                  return (
-                    <button
-                      key={t.id}
-                      onClick={() => toggleTheme(t.id)}
-                      className={cn(
-                        "card-soft flex items-start gap-3 p-5 text-left transition-all hover:shadow-lift",
-                        selected && "ring-2 ring-primary",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-                          selected
-                            ? "bg-success text-navy-foreground"
-                            : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {selected ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : (
-                          <Plus className="h-3.5 w-3.5" />
-                        )}
-                      </span>
-                      <img
-                        src={themeThumbs[t.id]}
-                        alt={`${t.label} ad example`}
-                        loading="lazy"
-                        width={106}
-                        height={111}
-                        className="h-16 w-16 shrink-0 rounded-lg border border-border object-cover"
-                      />
-                      <span>
-                        <span className="block font-display font-semibold">{t.label}</span>
-                        <span className="text-sm text-muted-foreground">{t.logic}</span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <ThemePicker
+              themeIds={themeIds}
+              onToggle={toggleTheme}
+              onClear={() => setThemeIds([])}
+            />
 
             <div className="space-y-3">
               <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Format</p>
@@ -960,7 +1181,7 @@ function CreateAd() {
               <Button variant="ghost" onClick={() => setStep(2)}>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Back
               </Button>
-              <Button disabled={!objective || themeIds.length === 0} onClick={() => setStep(4)}>
+              <Button disabled={themeIds.length === 0} onClick={() => setStep(4)}>
                 Continue to generate <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>

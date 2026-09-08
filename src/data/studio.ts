@@ -29,7 +29,17 @@ export const adScenes = [
 export type Platform = "instagram" | "facebook";
 export type AdFormat = "1:1" | "4:5" | "9:16";
 
-export type ThemeId = "showcase" | "stats" | "testimonial" | "us-vs-them";
+export type ThemeId =
+  | "before-after"
+  | "bold-claim"
+  | "feature-benefit"
+  | "headline"
+  | "offer-sale"
+  | "problem-solution"
+  | "showcase"
+  | "stats"
+  | "testimonial"
+  | "us-vs-them";
 export type ObjectiveId = "launch" | "sale" | "collection" | "awareness" | "retargeting";
 
 export const objectives: { id: ObjectiveId; label: string; blurb: string }[] = [
@@ -41,10 +51,16 @@ export const objectives: { id: ObjectiveId; label: string; blurb: string }[] = [
 ];
 
 export const themes: { id: ThemeId; label: string; logic: string }[] = [
+  { id: "before-after", label: "Before & After", logic: "Show the change, not the claim" },
+  { id: "bold-claim", label: "Bold Claim", logic: "One big promise, said plainly" },
+  { id: "feature-benefit", label: "Feature & Benefit", logic: "Turn specs into reasons to buy" },
+  { id: "headline", label: "Headline", logic: "One line does all the work" },
+  { id: "offer-sale", label: "Offer & Sale", logic: "Give a reason to move now" },
+  { id: "problem-solution", label: "Problem & Solution", logic: "Name the pain, then fix it" },
   { id: "showcase", label: "Product Showcase", logic: "Let the product be the hero" },
   { id: "stats", label: "Statistics & Social Proof", logic: "Borrow trust from numbers" },
   { id: "testimonial", label: "Testimonial", logic: "Let a happy customer sell it" },
-  { id: "us-vs-them", label: "Us vs Them", logic: "Position against the old way" },
+  { id: "us-vs-them", label: "Us and Them", logic: "Position against the old way" },
 ];
 
 export const formats: { id: AdFormat; label: string }[] = [
@@ -488,7 +504,7 @@ export const seededAds: Ad[] = [
 
 const audienceFor = (p: Product, i: number) => p.audiences[i % p.audiences.length]!;
 
-const coreIdeas: Record<ThemeId, (p: Product) => string[]> = {
+const coreIdeas: Partial<Record<ThemeId, (p: Product) => string[]>> = {
   showcase: (p) => [
     `Let the pour do the talking — ${p.tagline.toLowerCase()} in a single unbroken frame.`,
     `Frame the bottle as the hero object and keep the copy to one promise: ${p.tagline.toLowerCase()}.`,
@@ -527,7 +543,7 @@ const ctas: Record<ObjectiveId, string[]> = {
   retargeting: ["Complete your order", "Back to your cart", "Finish checkout"],
 };
 
-const captionOpeners: Record<ThemeId, (p: Product) => string> = {
+const captionOpeners: Partial<Record<ThemeId, (p: Product) => string>> = {
   showcase: (p) => `${p.captionLead}: ${p.tagline.toLowerCase()}.`,
   stats: (p) => `${p.stat}.`,
   testimonial: (p) => `"${p.quote}" — ${p.quoteAuthor}.`,
@@ -551,7 +567,7 @@ export function generateConcepts(input: GenerateInput): Ad[] {
   return Array.from({ length: input.count }, (_, k) => {
     const i = offset + k;
     const theme = themeList[i % themeList.length]!;
-    const ideas = coreIdeas[theme](product);
+    const ideas = (coreIdeas[theme] ?? coreIdeas.showcase!)(product);
     const hook = product.hook[i % product.hook.length]!;
     const scene = adScenes[(i * 3 + product.rank * 2) % adScenes.length]!;
 
@@ -572,7 +588,7 @@ export function generateConcepts(input: GenerateInput): Ad[] {
           : theme === "stats"
             ? product.stat
             : hook,
-      caption: `${captionOpeners[theme](product)} ${objectiveTail[input.objective]} $${product.price.toFixed(2)} — 16 drinks per bottle.`,
+      caption: `${(captionOpeners[theme] ?? captionOpeners.showcase!)(product)} ${objectiveTail[input.objective]} $${product.price.toFixed(2)} — 16 drinks per bottle.`,
       cta: ctas[input.objective][i % ctas[input.objective].length]!,
       favorite: false,
       createdAt: "Just now",
