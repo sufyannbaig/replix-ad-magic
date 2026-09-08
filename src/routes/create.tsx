@@ -238,9 +238,9 @@ function SummaryField({
   );
 }
 
-/* ---------- Step 2: the study moment, now a real photo analysis ---------- */
+/* ---------- Product panel: real photo analysis, editable summary ---------- */
 
-function UnderstandingStep({
+function ProductPanel({
   subject,
   analysis,
   onAnalysed,
@@ -303,191 +303,158 @@ function UnderstandingStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subject.dataUrl, attempt]);
 
-  return (
-    <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-      <div className="card-soft self-start overflow-hidden">
-        <img
-          src={subject.displayImage}
-          alt={subject.name}
-          className="aspect-square w-full object-cover"
-          loading="lazy"
-        />
-        <div className="p-4">
-          <p className="font-display font-semibold">{subject.name}</p>
-          {subject.price !== undefined ? (
-            <p className="text-sm text-muted-foreground">${subject.price.toFixed(2)}</p>
-          ) : null}
-          <div className="mt-3 flex gap-2">
-            <Button size="sm" variant="outline" onClick={onChangeProduct}>
-              Change
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-destructive hover:text-destructive"
-              onClick={onDeleteProduct}
-            >
-              Delete
-            </Button>
-          </div>
-        </div>
+  const thumb = (
+    <div className="w-full shrink-0 sm:w-40">
+      <img
+        src={subject.displayImage}
+        alt={subject.name}
+        className="aspect-square w-full rounded-xl border border-border object-cover"
+        loading="lazy"
+      />
+      <p className="mt-2 font-display text-sm font-semibold">{subject.name}</p>
+      {subject.price !== undefined ? (
+        <p className="text-xs text-muted-foreground">${subject.price.toFixed(2)}</p>
+      ) : null}
+      <div className="mt-2 flex gap-2">
+        <Button size="sm" variant="outline" onClick={onChangeProduct}>
+          Change
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:text-destructive"
+          onClick={onDeleteProduct}
+        >
+          Delete
+        </Button>
       </div>
+    </div>
+  );
 
-      <div className="space-y-5">
-        <div className="rounded-xl bg-navy p-6 text-navy-foreground shadow-lift">
-          <p className="text-xs tracking-[0.16em] text-navy-foreground/50 uppercase">
-            Studying your product
-          </p>
-          <ul className="mt-4 space-y-3">
-            {understandingSteps.map((label, i) => {
-              const isDone = completed > i;
-              const isActive = completed === i && !error;
-              return (
-                <li key={label} className="flex items-center gap-3">
-                  <span
-                    className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-full transition-all duration-500",
-                      isDone
-                        ? "scale-100 bg-success text-navy-foreground"
-                        : "bg-navy-soft text-navy-foreground/60",
-                    )}
-                  >
-                    {isDone ? (
-                      <Check className="h-4 w-4 animate-scale-in" />
-                    ) : isActive ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    )}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-sm transition-colors",
-                      isDone
-                        ? "text-navy-foreground"
-                        : isActive
-                          ? "text-navy-foreground/90"
-                          : "text-navy-foreground/45",
-                    )}
-                  >
-                    {label}
-                    {isActive ? "…" : ""}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-          <Progress
-            value={(completed / understandingSteps.length) * 100}
-            className="mt-5 h-1.5 bg-navy-foreground/15"
-          />
-        </div>
+  return (
+    <div className="rounded-2xl bg-muted/60 p-5">
+      <div className="card-soft p-5">
+        <div className="flex flex-col gap-6 sm:flex-row">
+          {thumb}
 
-        {error ? (
-          <div className="card-soft p-6">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <h3 className="font-display text-lg font-semibold">We couldn't read that photo</h3>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">{error}</p>
-            <Button className="mt-4" onClick={() => setAttempt((a) => a + 1)}>
-              Try again
-            </Button>
-          </div>
-        ) : analysis ? (
-          <div className="card-soft animate-fade-in p-6">
-            <div className="flex items-center gap-2">
-              <span className="rounded-lg bg-gold-soft p-2 text-navy">
-                <Lightbulb className="h-4 w-4" />
-              </span>
+          <div className="min-w-0 flex-1">
+            {error ? (
               <div>
-                <h3 className="font-display text-lg font-semibold">Here's what we found</h3>
-                <p className="text-xs text-muted-foreground">
-                  Edit anything that isn't quite right before you continue.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 max-h-[26rem] space-y-3 overflow-y-auto pr-1">
-              <SummaryField
-                label="Product highlights"
-                list
-                value={(analysis.highlights?.length ? analysis.highlights : (analysis.insights ?? [])).join(
-                  "\n",
-                )}
-                onSave={(next) =>
-                  onAnalysed({
-                    ...analysis,
-                    highlights: next
-                      .split("\n")
-                      .map((l) => l.replace(/^[-•\s]+/, "").trim())
-                      .filter(Boolean),
-                  })
-                }
-              />
-              <SummaryField
-                label="Ideal customer"
-                value={analysis.idealCustomer || analysis.audiences?.[0] || ""}
-                onSave={(next) => onAnalysed({ ...analysis, idealCustomer: next.trim() })}
-              />
-              <SummaryField
-                label="Pain point"
-                value={analysis.painPoint ?? ""}
-                onSave={(next) => onAnalysed({ ...analysis, painPoint: next.trim() })}
-              />
-              <SummaryField
-                label="Customer need"
-                value={analysis.customerNeed || analysis.sellingAngle || ""}
-                onSave={(next) => onAnalysed({ ...analysis, customerNeed: next.trim() })}
-              />
-            </div>
-            {analysis.colors.length || analysis.materials.length || analysis.visibleText.length ? (
-              <div className="mt-4 space-y-2 rounded-xl bg-muted/50 p-3 text-xs">
-                {analysis.colors.length ? (
-                  <p>
-                    <span className="font-semibold">Colours we can see:</span>{" "}
-                    <span className="text-muted-foreground">{analysis.colors.join(", ")}</span>
-                  </p>
-                ) : null}
-                {analysis.materials.length ? (
-                  <p>
-                    <span className="font-semibold">Materials and finishes:</span>{" "}
-                    <span className="text-muted-foreground">{analysis.materials.join(", ")}</span>
-                  </p>
-                ) : null}
-                {analysis.visibleText.length ? (
-                  <p>
-                    <span className="font-semibold">Text on the pack:</span>{" "}
-                    <span className="text-muted-foreground">
-                      {analysis.visibleText.join(" · ")}
-                    </span>
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        ) : (
-          <div className="card-soft p-6">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-8 w-8 rounded-lg" />
-              <Skeleton className="h-5 w-48" />
-            </div>
-            <div className="mt-4 space-y-3">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="space-y-2 rounded-xl bg-muted/70 p-3">
-                  <Skeleton className="h-3.5 w-full" />
-                  <Skeleton className="h-3.5 w-4/5" />
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <h3 className="font-display text-base font-semibold">
+                    We couldn't read that photo
+                  </h3>
                 </div>
-              ))}
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              Give us a few seconds — we read the photo itself before we write anything.
-            </p>
+                <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+                <Button className="mt-4" onClick={() => setAttempt((a) => a + 1)}>
+                  Try again
+                </Button>
+              </div>
+            ) : analysis ? (
+              <div className="animate-fade-in space-y-3">
+                <SummaryField
+                  label="Product highlights"
+                  list
+                  value={(analysis.highlights?.length
+                    ? analysis.highlights
+                    : (analysis.insights ?? [])
+                  ).join("\n")}
+                  onSave={(next) =>
+                    onAnalysed({
+                      ...analysis,
+                      highlights: next
+                        .split("\n")
+                        .map((l) => l.replace(/^[-•\s]+/, "").trim())
+                        .filter(Boolean),
+                    })
+                  }
+                />
+                <SummaryField
+                  label="Ideal customer"
+                  value={analysis.idealCustomer || analysis.audiences?.[0] || ""}
+                  onSave={(next) => onAnalysed({ ...analysis, idealCustomer: next.trim() })}
+                />
+                <div className="grid gap-3 md:grid-cols-2">
+                  <SummaryField
+                    label="Pain point"
+                    value={analysis.painPoint ?? ""}
+                    onSave={(next) => onAnalysed({ ...analysis, painPoint: next.trim() })}
+                  />
+                  <SummaryField
+                    label="Customer need"
+                    value={analysis.customerNeed || analysis.sellingAngle || ""}
+                    onSave={(next) => onAnalysed({ ...analysis, customerNeed: next.trim() })}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="rounded-xl bg-navy p-4 text-navy-foreground">
+                  <p className="text-xs tracking-[0.16em] text-navy-foreground/50 uppercase">
+                    Studying your product
+                  </p>
+                  <ul className="mt-3 space-y-2.5">
+                    {understandingSteps.map((label, i) => {
+                      const isDone = completed > i;
+                      const isActive = completed === i;
+                      return (
+                        <li key={label} className="flex items-center gap-3">
+                          <span
+                            className={cn(
+                              "flex h-6 w-6 items-center justify-center rounded-full transition-all duration-500",
+                              isDone
+                                ? "bg-success text-navy-foreground"
+                                : "bg-navy-soft text-navy-foreground/60",
+                            )}
+                          >
+                            {isDone ? (
+                              <Check className="h-3.5 w-3.5 animate-scale-in" />
+                            ) : isActive ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            )}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-sm",
+                              isDone
+                                ? "text-navy-foreground"
+                                : isActive
+                                  ? "text-navy-foreground/90"
+                                  : "text-navy-foreground/45",
+                            )}
+                          >
+                            {label}
+                            {isActive ? "…" : ""}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <Progress
+                    value={(completed / understandingSteps.length) * 100}
+                    className="mt-4 h-1.5 bg-navy-foreground/15"
+                  />
+                </div>
+                <div className="mt-3 space-y-3">
+                  {[0, 1].map((i) => (
+                    <div key={i} className="space-y-2 rounded-xl bg-muted/70 p-3">
+                      <Skeleton className="h-3.5 w-full" />
+                      <Skeleton className="h-3.5 w-4/5" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 }
+
 
 /* ---------- Step 4: real generation progress ---------- */
 
