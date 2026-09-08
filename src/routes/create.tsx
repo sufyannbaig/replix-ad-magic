@@ -151,16 +151,106 @@ function StepRail({ step }: { step: number }) {
   );
 }
 
+/** One labelled, inline-editable field of the product summary card. */
+function SummaryField({
+  label,
+  value,
+  list,
+  onSave,
+}: {
+  label: string;
+  value: string;
+  list?: boolean;
+  onSave: (next: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  const start = () => {
+    setDraft(value);
+    setEditing(true);
+  };
+  const save = () => {
+    onSave(draft);
+    setEditing(false);
+  };
+
+  const lines = value
+    .split("\n")
+    .map((l) => l.replace(/^[-•\s]+/, "").trim())
+    .filter(Boolean);
+
+  return (
+    <div className="rounded-xl border border-border bg-muted/50 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs font-semibold tracking-[0.14em] text-navy uppercase">{label}</p>
+        {editing ? null : (
+          <button
+            onClick={start}
+            aria-label={`Edit ${label}`}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-gold-soft hover:text-navy"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="mt-2 space-y-2">
+          <Textarea
+            value={draft}
+            rows={list ? 6 : 3}
+            onChange={(e) => setDraft(e.target.value)}
+            aria-label={`${label} text`}
+          />
+          {list ? (
+            <p className="text-xs text-muted-foreground">One selling point per line.</p>
+          ) : null}
+          <div className="flex gap-2">
+            <Button size="sm" onClick={save}>
+              Save
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : list ? (
+        <ul className="mt-2 space-y-2">
+          {lines.length ? (
+            lines.map((line) => (
+              <li key={line} className="flex gap-2">
+                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
+                <span className="text-sm leading-relaxed">{line}</span>
+              </li>
+            ))
+          ) : (
+            <li className="text-sm text-muted-foreground">Nothing yet — add your own.</li>
+          )}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm leading-relaxed">
+          {value || <span className="text-muted-foreground">Nothing yet — add your own.</span>}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /* ---------- Step 2: the study moment, now a real photo analysis ---------- */
 
 function UnderstandingStep({
   subject,
   analysis,
   onAnalysed,
+  onChangeProduct,
+  onDeleteProduct,
 }: {
   subject: Subject;
   analysis: ProductAnalysis | null;
   onAnalysed: (analysis: ProductAnalysis) => void;
+  onChangeProduct: () => void;
+  onDeleteProduct: () => void;
 }) {
   const [completed, setCompleted] = useState(analysis ? understandingSteps.length : 0);
   const [error, setError] = useState<string | null>(null);
@@ -226,6 +316,19 @@ function UnderstandingStep({
           {subject.price !== undefined ? (
             <p className="text-sm text-muted-foreground">${subject.price.toFixed(2)}</p>
           ) : null}
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="outline" onClick={onChangeProduct}>
+              Change
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-destructive hover:text-destructive"
+              onClick={onDeleteProduct}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -296,16 +399,46 @@ function UnderstandingStep({
               <span className="rounded-lg bg-gold-soft p-2 text-navy">
                 <Lightbulb className="h-4 w-4" />
               </span>
-              <h3 className="font-display text-lg font-semibold">Here's what we found</h3>
+              <div>
+                <h3 className="font-display text-lg font-semibold">Here's what we found</h3>
+                <p className="text-xs text-muted-foreground">
+                  Edit anything that isn't quite right before you continue.
+                </p>
+              </div>
             </div>
-            <ul className="mt-4 space-y-3">
-              {analysis.insights.map((insight) => (
-                <li key={insight} className="flex gap-3 rounded-xl bg-muted/70 p-3">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                  <p className="text-sm leading-relaxed">{insight}</p>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-4 max-h-[26rem] space-y-3 overflow-y-auto pr-1">
+              <SummaryField
+                label="Product highlights"
+                list
+                value={(analysis.highlights.length ? analysis.highlights : analysis.insights).join(
+                  "\n",
+                )}
+                onSave={(next) =>
+                  onAnalysed({
+                    ...analysis,
+                    highlights: next
+                      .split("\n")
+                      .map((l) => l.replace(/^[-•\s]+/, "").trim())
+                      .filter(Boolean),
+                  })
+                }
+              />
+              <SummaryField
+                label="Ideal customer"
+                value={analysis.idealCustomer || analysis.audiences[0] || ""}
+                onSave={(next) => onAnalysed({ ...analysis, idealCustomer: next.trim() })}
+              />
+              <SummaryField
+                label="Pain point"
+                value={analysis.painPoint}
+                onSave={(next) => onAnalysed({ ...analysis, painPoint: next.trim() })}
+              />
+              <SummaryField
+                label="Customer need"
+                value={analysis.customerNeed || analysis.sellingAngle}
+                onSave={(next) => onAnalysed({ ...analysis, customerNeed: next.trim() })}
+              />
+            </div>
             {analysis.colors.length || analysis.materials.length || analysis.visibleText.length ? (
               <div className="mt-4 space-y-2 rounded-xl bg-muted/50 p-3 text-xs">
                 {analysis.colors.length ? (
@@ -986,7 +1119,17 @@ function CreateAd() {
                 Before we write a single hook, we look at what you're actually selling.
               </p>
             </div>
-            <UnderstandingStep subject={subject} analysis={analysis} onAnalysed={setAnalysis} />
+            <UnderstandingStep
+              subject={subject}
+              analysis={analysis}
+              onAnalysed={setAnalysis}
+              onChangeProduct={() => setStep(1)}
+              onDeleteProduct={() => {
+                setSubject(null);
+                setAnalysis(null);
+                setStep(1);
+              }}
+            />
             <div className="flex items-center justify-between">
               <Button variant="ghost" onClick={() => setStep(1)}>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Change product
