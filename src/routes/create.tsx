@@ -528,14 +528,9 @@ function ThemePicker({
   const preview = chosen.length ? chosen : themes.slice(0, 3);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Creative theme</p>
-        <span className="text-xs text-muted-foreground">{themeIds.length} of 3 chosen</span>
-      </div>
-
-      <div className="card-soft flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
-        <div className="flex shrink-0 items-center">
+    <div className="rounded-2xl bg-muted/60 p-5">
+      <div className="card-soft flex flex-col items-center gap-4 p-5 text-center">
+        <div className="flex h-28 items-center justify-center pt-2">
           {preview.map((t, i) => (
             <img
               key={t.id}
@@ -545,45 +540,54 @@ function ThemePicker({
               width={816}
               height={816}
               className={cn(
-                "h-20 w-20 rounded-xl border-2 border-card object-cover shadow-lift",
-                i > 0 && "-ml-8",
+                "h-24 w-24 rounded-xl border-2 border-card object-cover shadow-lift transition-transform",
+                i > 0 && "-ml-10",
+                i === 0 && "-rotate-8",
+                i === 1 && "rotate-1 z-10",
+                i === 2 && "rotate-8 z-20",
               )}
             />
           ))}
         </div>
 
-        <div className="min-w-0 flex-1">
-          {chosen.length ? (
-            <div className="flex flex-wrap gap-2">
-              {chosen.map((t) => (
-                <Badge
-                  key={t.id}
-                  className="bg-gold-soft text-navy hover:bg-gold-soft"
-                  onClick={() => onToggle(t.id)}
-                >
-                  {t.label}
-                  <X className="ml-1 h-3 w-3" />
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Ten ad styles to choose from — from a plain bold claim to a before-and-after.
-            </p>
-          )}
-        </div>
+        <p className="text-sm font-semibold text-navy underline decoration-navy/40 underline-offset-4">
+          Select Creative Theme
+        </p>
 
-        <div className="flex shrink-0 gap-2">
+        {chosen.length ? (
+          <div className="flex flex-wrap justify-center gap-2">
+            {chosen.map((t) => (
+              <Badge
+                key={t.id}
+                className="cursor-pointer bg-gold-soft text-navy hover:bg-gold-soft"
+                onClick={() => onToggle(t.id)}
+              >
+                {t.label}
+                <X className="ml-1 h-3 w-3" />
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Ten ad styles — from a plain bold claim to a before-and-after.
+          </p>
+        )}
+
+        <div className="flex w-full flex-col gap-2">
+          <Button
+            className="w-full bg-navy text-navy-foreground hover:bg-navy-soft"
+            onClick={() => setOpen(true)}
+          >
+            <LayoutGrid className="mr-1 h-4 w-4" /> Select Theme
+          </Button>
           {chosen.length ? (
-            <Button variant="ghost" onClick={onClear}>
+            <Button variant="ghost" size="sm" onClick={onClear}>
               Clear
             </Button>
           ) : null}
-          <Button onClick={() => setOpen(true)}>
-            <LayoutGrid className="mr-1 h-4 w-4" /> Select creative theme
-          </Button>
         </div>
       </div>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
