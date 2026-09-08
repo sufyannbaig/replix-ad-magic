@@ -504,7 +504,7 @@ export const seededAds: Ad[] = [
 
 const audienceFor = (p: Product, i: number) => p.audiences[i % p.audiences.length]!;
 
-const coreIdeas: Record<ThemeId, (p: Product) => string[]> = {
+const coreIdeas: Partial<Record<ThemeId, (p: Product) => string[]>> = {
   showcase: (p) => [
     `Let the pour do the talking — ${p.tagline.toLowerCase()} in a single unbroken frame.`,
     `Frame the bottle as the hero object and keep the copy to one promise: ${p.tagline.toLowerCase()}.`,
@@ -543,7 +543,7 @@ const ctas: Record<ObjectiveId, string[]> = {
   retargeting: ["Complete your order", "Back to your cart", "Finish checkout"],
 };
 
-const captionOpeners: Record<ThemeId, (p: Product) => string> = {
+const captionOpeners: Partial<Record<ThemeId, (p: Product) => string>> = {
   showcase: (p) => `${p.captionLead}: ${p.tagline.toLowerCase()}.`,
   stats: (p) => `${p.stat}.`,
   testimonial: (p) => `"${p.quote}" — ${p.quoteAuthor}.`,
@@ -567,7 +567,7 @@ export function generateConcepts(input: GenerateInput): Ad[] {
   return Array.from({ length: input.count }, (_, k) => {
     const i = offset + k;
     const theme = themeList[i % themeList.length]!;
-    const ideas = coreIdeas[theme](product);
+    const ideas = (coreIdeas[theme] ?? coreIdeas.showcase!)(product);
     const hook = product.hook[i % product.hook.length]!;
     const scene = adScenes[(i * 3 + product.rank * 2) % adScenes.length]!;
 
@@ -588,7 +588,7 @@ export function generateConcepts(input: GenerateInput): Ad[] {
           : theme === "stats"
             ? product.stat
             : hook,
-      caption: `${captionOpeners[theme](product)} ${objectiveTail[input.objective]} $${product.price.toFixed(2)} — 16 drinks per bottle.`,
+      caption: `${(captionOpeners[theme] ?? captionOpeners.showcase!)(product)} ${objectiveTail[input.objective]} $${product.price.toFixed(2)} — 16 drinks per bottle.`,
       cta: ctas[input.objective][i % ctas[input.objective].length]!,
       favorite: false,
       createdAt: "Just now",
