@@ -1002,15 +1002,11 @@ function CreateAd() {
   };
 
   return (
-    <AppShell
-      title="Create Ad"
-      subtitle="Four steps from product to a batch of ready-to-run creatives"
-    >
+    <AppShell title="Create Ad" subtitle="From product to ready-to-run creatives">
       <div className="space-y-7">
-        <StepRail step={step} />
-
         {step === 1 ? (
           <section className="space-y-5">
+            <StepRail step={step} />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className="font-display text-xl font-semibold">Pick a product</h2>
@@ -1084,124 +1080,110 @@ function CreateAd() {
         ) : null}
 
         {step === 2 && subject ? (
-          <section className="space-y-5">
-            <div>
-              <h2 className="font-display text-xl font-semibold">Understanding your product</h2>
-              <p className="text-sm text-muted-foreground">
-                Before we write a single hook, we look at what you're actually selling.
-              </p>
-            </div>
-            <UnderstandingStep
-              subject={subject}
-              analysis={analysis}
-              onAnalysed={setAnalysis}
-              onChangeProduct={() => setStep(1)}
-              onDeleteProduct={() => {
-                setSubject(null);
-                setAnalysis(null);
-                setStep(1);
-              }}
-            />
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" onClick={() => setStep(1)}>
-                <ArrowLeft className="mr-1 h-4 w-4" /> Change product
-              </Button>
-              <Button disabled={!analysis} onClick={() => setStep(3)}>
-                {analysis ? "Choose your angle" : "Studying…"}
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-          </section>
-        ) : null}
-
-        {step === 3 ? (
-          <section className="space-y-7">
-            <div>
-              <h2 className="font-display text-xl font-semibold">Choose your angle</h2>
-              <p className="text-sm text-muted-foreground">
-                Pick up to three creative themes — each one sets the story the ad tells.
-              </p>
-            </div>
-
-            <ThemePicker
-              themeIds={themeIds}
-              onToggle={toggleTheme}
-              onClear={() => setThemeIds([])}
-            />
-
-            <div className="space-y-3">
-              <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Format</p>
-              <div className="flex flex-wrap gap-2">
-                {formats.map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => setFormat(f.id)}
-                    className={cn(
-                      "rounded-full border px-4 py-1.5 text-sm transition-colors",
-                      format === f.id
-                        ? "border-primary bg-gold-soft font-semibold"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/50",
-                    )}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" onClick={() => setStep(2)}>
-                <ArrowLeft className="mr-1 h-4 w-4" /> Back
-              </Button>
-              <Button disabled={themeIds.length === 0} onClick={() => setStep(4)}>
-                Continue to generate <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-          </section>
-        ) : null}
-
-        {step === 4 ? (
           <section className="space-y-6">
-            {results.length === 0 && !generating ? (
-              <div className="card-soft mx-auto max-w-2xl p-7">
-                <h2 className="font-display text-xl font-semibold">How many concepts?</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  We generate more than you need, because the first couple are always warm-ups —
-                  pick your favourites and bin the rest.
-                </p>
-                <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-                  {[3, 5, 10].map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => setBatch(n)}
-                      className={cn(
-                        "flex-1 rounded-xl border px-4 py-4 text-center transition-colors",
-                        batch === n
-                          ? "border-primary bg-gold-soft"
-                          : "border-border bg-card hover:border-primary/50",
-                      )}
-                    >
-                      <span className="block font-display text-2xl font-semibold">{n}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {n === 3 ? "quick test" : n === 5 ? "recommended" : "full sweep"}
-                      </span>
-                    </button>
-                  ))}
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Select a product from your store inventory to begin.
+              </p>
+              <h2 className="font-display text-2xl font-semibold">Create a new ad</h2>
+            </div>
+
+            <StepRail step={step} />
+
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              <div className="space-y-3">
+                <h3 className="font-display text-lg font-semibold">Product</h3>
+                <ProductPanel
+                  subject={subject}
+                  analysis={analysis}
+                  onAnalysed={setAnalysis}
+                  onChangeProduct={() => setStep(1)}
+                  onDeleteProduct={() => {
+                    setSubject(null);
+                    setAnalysis(null);
+                    setStep(1);
+                  }}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <h3 className="font-display text-lg font-semibold">Creative Themes</h3>
+                  <span className="text-xs text-muted-foreground">
+                    {themeIds.length} of 3 chosen
+                  </span>
                 </div>
-                {genError ? (
-                  <p className="mt-5 flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {genError}
-                  </p>
-                ) : null}
-                <div className="mt-6 flex items-center justify-between">
-                  <Button variant="ghost" onClick={() => setStep(3)}>
-                    <ArrowLeft className="mr-1 h-4 w-4" /> Back
-                  </Button>
-                  <Button size="lg" onClick={() => void runGeneration(batch)}>
-                    <Sparkles className="mr-1 h-4 w-4" /> Generate {batch} concepts
-                  </Button>
+                <ThemePicker
+                  themeIds={themeIds}
+                  onToggle={toggleTheme}
+                  onClear={() => setThemeIds([])}
+                />
+              </div>
+            </div>
+
+            {/* One combined toolbar: format, batch size, generate */}
+            <div className="card-soft flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
+                    Format
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {formats.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => setFormat(f.id)}
+                        className={cn(
+                          "rounded-full border px-3 py-1 text-xs transition-colors",
+                          format === f.id
+                            ? "border-primary bg-gold-soft font-semibold text-navy"
+                            : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                        )}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
+                    Concepts
+                  </span>
+                  <div className="flex gap-1.5">
+                    {[3, 5, 10].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setBatch(n)}
+                        className={cn(
+                          "h-8 w-9 rounded-full border text-xs font-semibold transition-colors",
+                          batch === n
+                            ? "border-primary bg-gold-soft text-navy"
+                            : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                        )}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
+
+              <Button
+                size="lg"
+                className="bg-navy text-navy-foreground hover:bg-navy-soft"
+                disabled={generating || !analysis || themeIds.length === 0}
+                onClick={() => void runGeneration(batch)}
+              >
+                <Sparkles className="mr-1 h-4 w-4" />
+                {generating ? "Generating…" : "Generate Ad"}
+              </Button>
+            </div>
+
+            {genError ? (
+              <p className="flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {genError}
+              </p>
             ) : null}
 
             {generating ? (
@@ -1216,47 +1198,177 @@ function CreateAd() {
             ) : null}
 
             {results.length > 0 && !generating ? (
-              <>
+              <div className="space-y-5">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <h2 className="font-display text-xl font-semibold">
+                    <h3 className="font-display text-xl font-semibold">
                       {results.length} concepts ready
-                    </h2>
+                    </h3>
                     <p className="text-sm text-muted-foreground">
                       {pending > 0
                         ? `Still painting ${pending} scene${pending === 1 ? "" : "s"} around your product…`
                         : "Star the ones worth running — they'll show up in your gallery either way."}
                     </p>
                   </div>
-                  <Button variant="ghost" onClick={() => setStep(3)}>
-                    <ArrowLeft className="mr-1 h-4 w-4" /> Change the angle
-                  </Button>
-                </div>
-                {genError ? (
-                  <p className="flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> {genError}
-                  </p>
-                ) : null}
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                  {results.map((ad) => (
-                    <AdCard key={ad.id} ad={ad} onRegenerate={handleRegenerate} />
-                  ))}
-                </div>
-                <div className="flex justify-center">
                   <Button
                     variant="outline"
-                    size="lg"
                     disabled={pending > 0}
                     onClick={() => void runGeneration(5)}
                   >
                     <Plus className="mr-1 h-4 w-4" /> Generate 5 more
                   </Button>
                 </div>
-              </>
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {results.map((ad) => (
+                    <AdCard key={ad.id} ad={ad} onRegenerate={handleRegenerate} />
+                  ))}
+                </div>
+              </div>
             ) : null}
+
+            <RecentGenerations />
           </section>
         ) : null}
       </div>
     </AppShell>
   );
 }
+
+/* ---------- Recent Ads Generations: real past results, horizontally scrolled ---------- */
+
+function RecentGenerations() {
+  const { ads, updateAd } = useStudio();
+  const scroller = useRef<HTMLDivElement | null>(null);
+  const [editing, setEditing] = useState<Ad | null>(null);
+  const [headline, setHeadline] = useState("");
+  const [caption, setCaption] = useState("");
+  const [cta, setCta] = useState("");
+
+  const recent = ads.filter((a) => a.image).slice(0, 12);
+  if (!recent.length) return null;
+
+  const startEdit = (ad: Ad) => {
+    setHeadline(ad.headline);
+    setCaption(ad.caption);
+    setCta(ad.cta);
+    setEditing(ad);
+  };
+
+  const share = async (ad: Ad) => {
+    try {
+      await navigator.clipboard.writeText(`${ad.headline}\n\n${ad.caption}\n\n${ad.image}`);
+      toast.success("Ad copy and link copied — ready to share.");
+    } catch {
+      toast.error("Could not copy that ad.");
+    }
+  };
+
+  return (
+    <section className="space-y-4 pt-2">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 className="font-display text-xl font-semibold">Recent Ads Generations</h3>
+          <p className="text-sm text-muted-foreground">
+            The most recent results generated through the app.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/gallery">View All</Link>
+        </Button>
+      </div>
+
+      <div className="relative">
+        <div
+          ref={scroller}
+          className="flex gap-4 overflow-x-auto scroll-smooth pb-2"
+          role="list"
+          aria-label="Recent ad generations"
+        >
+          {recent.map((ad) => (
+            <div
+              key={ad.id}
+              role="listitem"
+              className="group card-soft relative w-44 shrink-0 overflow-hidden"
+            >
+              <img
+                src={ad.image}
+                alt={ad.headline}
+                loading="lazy"
+                className="aspect-square w-full object-cover"
+              />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-navy/70 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex gap-2">
+                  <button
+                    aria-label="Edit copy"
+                    onClick={() => startEdit(ad)}
+                    className="rounded-full bg-card/90 p-2 text-navy transition-colors hover:bg-card"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    aria-label="Download"
+                    onClick={() =>
+                      void downloadImage(
+                        ad.image,
+                        `${ad.productName.replace(/\s+/g, "-").toLowerCase()}-ad.png`,
+                      ).catch(() => toast.error("Could not download that image."))
+                    }
+                    className="rounded-full bg-card/90 p-2 text-navy transition-colors hover:bg-card"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <Button size="sm" onClick={() => void share(ad)}>
+                  <Share2 className="mr-1 h-3.5 w-3.5" /> Share
+                </Button>
+              </div>
+              <div className="p-3">
+                <p className="truncate text-xs font-semibold">{ad.headline}</p>
+                <p className="truncate text-[0.7rem] text-muted-foreground">{ad.productName}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Fade-out edge plus a nudge control */}
+        <div className="pointer-events-none absolute top-0 right-0 bottom-2 w-20 bg-gradient-to-l from-background to-transparent" />
+        <button
+          aria-label="Scroll right"
+          onClick={() => scroller.current?.scrollBy({ left: 400, behavior: "smooth" })}
+          className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-navy p-2 text-navy-foreground shadow-lift transition-colors hover:bg-navy-soft"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      <Dialog open={editing !== null} onOpenChange={(v) => !v && setEditing(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">Edit ad copy</DialogTitle>
+            <DialogDescription>Rewrite the hook, caption or button text.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input value={headline} onChange={(e) => setHeadline(e.target.value)} />
+            <Textarea value={caption} rows={4} onChange={(e) => setCaption(e.target.value)} />
+            <Input value={cta} onChange={(e) => setCta(e.target.value)} />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setEditing(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (editing) updateAd(editing.id, { headline, caption, cta });
+                setEditing(null);
+                toast.success("Copy updated");
+              }}
+            >
+              Save copy
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
+
