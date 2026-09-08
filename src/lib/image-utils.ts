@@ -1,4 +1,8 @@
-const MAX_EDGE = 1024;
+/** Longest edge sent to the AI models — bigger than this adds cost, not quality. */
+const MAX_EDGE = 2048;
+/** Hard limit on an uploaded file. */
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+export const MAX_UPLOAD_LABEL = "10MB";
 
 function canvasToDataUrl(img: HTMLImageElement): string {
   const scale = Math.min(1, MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
