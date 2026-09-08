@@ -400,8 +400,8 @@ function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
     try {
       setDataUrl(await fileToDataUrl(file));
       if (!name) setName(file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "));
-    } catch {
-      toast.error("We couldn't read that image file.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "We couldn't read that image file.");
     } finally {
       setBusy(false);
     }

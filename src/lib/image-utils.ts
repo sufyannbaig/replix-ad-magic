@@ -1,4 +1,8 @@
-const MAX_EDGE = 1024;
+/** Longest edge sent to the AI models — bigger than this adds cost, not quality. */
+const MAX_EDGE = 2048;
+/** Hard limit on an uploaded file. */
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+export const MAX_UPLOAD_LABEL = "10MB";
 
 function canvasToDataUrl(img: HTMLImageElement): string {
   const scale = Math.min(1, MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
@@ -29,6 +33,12 @@ export async function urlToDataUrl(src: string): Promise<string> {
 
 /** Turn an uploaded file into a compact data URL. */
 export async function fileToDataUrl(file: File): Promise<string> {
+  if (file.size > MAX_UPLOAD_BYTES) {
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    throw new Error(
+      `That image is ${mb}MB. Please upload a photo of ${MAX_UPLOAD_LABEL} or less.`,
+    );
+  }
   const objectUrl = URL.createObjectURL(file);
   try {
     const img = await loadImage(objectUrl);

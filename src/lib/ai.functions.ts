@@ -34,8 +34,18 @@ export type ConceptCopy = {
 
 const CHAT_MODEL = "openai/gpt-5.6-sol";
 
+/** Guard so nothing oversized ever reaches the paid models (2048px JPEG stays well under this). */
+const MAX_MODEL_IMAGE_CHARS = 14 * 1024 * 1024;
+const modelImage = z
+  .string()
+  .min(30)
+  .max(
+    MAX_MODEL_IMAGE_CHARS,
+    "That image is too large to send for generation. Please use a photo of 10MB or less.",
+  );
+
 const analyzeInput = z.object({
-  imageDataUrl: z.string().min(30),
+  imageDataUrl: modelImage,
   productName: z.string().optional(),
   price: z.number().optional(),
   storeName: z.string().optional(),
@@ -169,7 +179,7 @@ Every concept must use a different scene in imageBrief and a different headline.
   });
 
 const imageInput = z.object({
-  imageDataUrl: z.string().min(30),
+  imageDataUrl: modelImage,
   imageBrief: z.string().min(3),
   productName: z.string(),
   format: z.enum(["1:1", "4:5", "9:16"]),
