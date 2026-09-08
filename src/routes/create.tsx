@@ -516,7 +516,6 @@ type WizardCache = {
   mode: "product" | "upload";
   subject: Subject | null;
   analysis: ProductAnalysis | null;
-  objective: ObjectiveId | null;
   themeIds: ThemeId[];
   format: AdFormat;
   batch: number;
@@ -529,7 +528,6 @@ const wizardCache: WizardCache = {
   mode: "product",
   subject: null,
   analysis: null,
-  objective: null,
   themeIds: [],
   format: "1:1",
   batch: 5,
@@ -544,7 +542,6 @@ function CreateAd() {
   const [subject, setSubject] = useState<Subject | null>(wizardCache.subject);
   const [preparing, setPreparing] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<ProductAnalysis | null>(wizardCache.analysis);
-  const [objective, setObjective] = useState<ObjectiveId | null>(wizardCache.objective);
   const [themeIds, setThemeIds] = useState<ThemeId[]>(wizardCache.themeIds);
   const [format, setFormat] = useState<AdFormat>(wizardCache.format);
   const [batch, setBatch] = useState(wizardCache.batch);
@@ -562,13 +559,12 @@ function CreateAd() {
     wizardCache.mode = mode;
     wizardCache.subject = subject;
     wizardCache.analysis = analysis;
-    wizardCache.objective = objective;
     wizardCache.themeIds = themeIds;
     wizardCache.format = format;
     wizardCache.batch = batch;
     wizardCache.results = results;
     wizardCache.batchIndex = batchIndex.current;
-  }, [step, mode, subject, analysis, objective, themeIds, format, batch, results]);
+  }, [step, mode, subject, analysis, themeIds, format, batch, results]);
 
   // Never sit on a step whose inputs are missing — that used to render a blank
   // panel that looked like the wizard had reset itself.
@@ -651,12 +647,11 @@ function CreateAd() {
       toast.error("Pick a product or photo first so we have something to study.");
       return;
     }
-    if (!objective || themeIds.length === 0) {
+    if (themeIds.length === 0) {
       setStep(3);
-      toast.error("Choose an objective and at least one creative theme.");
+      toast.error("Choose at least one creative theme.");
       return;
     }
-    const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
 
 
@@ -673,8 +668,6 @@ function CreateAd() {
           productName: subject.name,
           ...(subject.price !== undefined ? { price: subject.price } : {}),
           storeName: subject.source === "shopify" ? store.name : undefined,
-          objective,
-          objectiveLabel,
           themes: chosenThemes,
           format,
           count,
@@ -692,7 +685,7 @@ function CreateAd() {
         format,
         theme: (chosenThemes.find((t) => t.id === concept.theme)?.id ??
           chosenThemes[i % chosenThemes.length]!.id) as ThemeId,
-        objective,
+        objective: DEFAULT_OBJECTIVE,
         image: "",
         source: subject.source,
         audience: concept.audience,
@@ -725,9 +718,8 @@ function CreateAd() {
   };
 
   const handleRegenerate = async (ad: Ad) => {
-    if (!subject || !objective || !analysis) return;
+    if (!subject || !analysis) return;
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
-    const objectiveLabel = objectives.find((o) => o.id === objective)?.label ?? objective;
     try {
       const [concept] = await generateAdCopy({
         data: {
@@ -735,8 +727,6 @@ function CreateAd() {
           productName: subject.name,
           ...(subject.price !== undefined ? { price: subject.price } : {}),
           storeName: subject.source === "shopify" ? store.name : undefined,
-          objective,
-          objectiveLabel,
           themes: chosenThemes.length ? chosenThemes : themes.slice(0, 1),
           format: ad.format,
           count: 1,
