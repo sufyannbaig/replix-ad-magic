@@ -410,6 +410,137 @@ function GenerationProgress({
   );
 }
 
+
+/* ---------- Step 3: one unified creative-theme picker ---------- */
+
+function ThemePicker({
+  themeIds,
+  onToggle,
+  onClear,
+}: {
+  themeIds: ThemeId[];
+  onToggle: (id: ThemeId) => void;
+  onClear: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const chosen = themes.filter((t) => themeIds.includes(t.id));
+  const preview = chosen.length ? chosen : themes.slice(0, 3);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Creative theme</p>
+        <span className="text-xs text-muted-foreground">{themeIds.length} of 3 chosen</span>
+      </div>
+
+      <div className="card-soft flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
+        <div className="flex shrink-0 items-center">
+          {preview.map((t, i) => (
+            <img
+              key={t.id}
+              src={themeThumbs[t.id]}
+              alt={`${t.label} example`}
+              loading="lazy"
+              width={816}
+              height={816}
+              className={cn(
+                "h-20 w-20 rounded-xl border-2 border-card object-cover shadow-lift",
+                i > 0 && "-ml-8",
+              )}
+            />
+          ))}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          {chosen.length ? (
+            <div className="flex flex-wrap gap-2">
+              {chosen.map((t) => (
+                <Badge
+                  key={t.id}
+                  className="bg-gold-soft text-navy hover:bg-gold-soft"
+                  onClick={() => onToggle(t.id)}
+                >
+                  {t.label}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Ten ad styles to choose from — from a plain bold claim to a before-and-after.
+            </p>
+          )}
+        </div>
+
+        <div className="flex shrink-0 gap-2">
+          {chosen.length ? (
+            <Button variant="ghost" onClick={onClear}>
+              Clear
+            </Button>
+          ) : null}
+          <Button onClick={() => setOpen(true)}>
+            <LayoutGrid className="mr-1 h-4 w-4" /> Select creative theme
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="font-display">Creative themes</DialogTitle>
+            <DialogDescription>
+              Choose up to three. Each preview is an example of that style, not your ad.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {themes.map((t) => {
+              const selected = themeIds.includes(t.id);
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => onToggle(t.id)}
+                  className={cn(
+                    "card-soft overflow-hidden text-left transition-all hover:shadow-lift",
+                    selected && "ring-2 ring-primary",
+                  )}
+                >
+                  <div className="relative">
+                    <img
+                      src={themeThumbs[t.id]}
+                      alt={`${t.label} example`}
+                      loading="lazy"
+                      width={816}
+                      height={816}
+                      className="aspect-square w-full object-cover"
+                    />
+                    <span
+                      className={cn(
+                        "absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full",
+                        selected
+                          ? "bg-success text-navy-foreground"
+                          : "bg-card/90 text-muted-foreground",
+                      )}
+                    >
+                      {selected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    </span>
+                  </div>
+                  <div className="p-3">
+                    <p className="font-display text-sm font-semibold">{t.label}</p>
+                    <p className="text-xs text-muted-foreground">{t.logic}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setOpen(false)}>Done</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 /* ---------- Step 1: pick a product or upload a photo ---------- */
 
 function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
@@ -907,7 +1038,7 @@ function CreateAd() {
               <Button variant="ghost" onClick={() => setStep(2)}>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Back
               </Button>
-              <Button disabled={!objective || themeIds.length === 0} onClick={() => setStep(4)}>
+              <Button disabled={themeIds.length === 0} onClick={() => setStep(4)}>
                 Continue to generate <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
