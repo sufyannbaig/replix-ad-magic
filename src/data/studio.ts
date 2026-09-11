@@ -101,7 +101,7 @@ export const user = {
   plan: "Free",
 };
 
-export const credits = { used: 11, total: 100, remaining: 89 };
+export const credits = { used: 0, total: 100, remaining: 100 };
 
 export const products: Product[] = [
   {

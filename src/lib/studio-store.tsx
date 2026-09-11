@@ -55,7 +55,6 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           const fresh = stored.filter((a) => !known.has(a.id));
           return [...fresh, ...prev];
         });
-        setCreditsUsed((prev) => Math.min(seedCredits.total, prev + stored.length));
       })
       .catch((error) => console.error("[studio] could not load saved ads", error));
     return () => {
