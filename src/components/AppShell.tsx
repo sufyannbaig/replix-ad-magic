@@ -1,100 +1,78 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
-  Images,
-  Megaphone,
-  ChartNoAxesCombined,
-  CreditCard,
-  LifeBuoy,
   Menu,
-  CheckCircle2,
-  type LucideIcon,
+  Sparkles,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { store, user } from "@/data/studio";
+import { Button } from "@/components/ui/button";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
 
-type NavItem = { to: string; label: string; icon: LucideIcon };
+type NavItem = { to: "/" | "/gallery" | "/campaigns" | "/analytics" | "/billing" | "/help"; label: string };
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/gallery", label: "My Creatives", icon: Images },
-  { to: "/campaigns", label: "My Campaigns", icon: Megaphone },
-  { to: "/analytics", label: "Analytics", icon: ChartNoAxesCombined },
-  { to: "/billing", label: "Pricing & Billing", icon: CreditCard },
-  { to: "/help", label: "Help", icon: LifeBuoy },
+  { to: "/", label: "Dashboard" },
+  { to: "/gallery", label: "My Creatives" },
+  { to: "/campaigns", label: "My Campaigns" },
+  { to: "/analytics", label: "Analytics" },
+  { to: "/billing", label: "Pricing & Billing" },
+  { to: "/help", label: "Help" },
 ];
 
-function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
+function Brand({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center gap-3" aria-label="Replix AI dashboard">
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy font-display text-xl font-bold text-gold">
+        R
+      </span>
+      <span className="font-display text-base font-bold text-navy">REPLIX AI</span>
+    </Link>
+  );
+}
+
+function NavLinks({ onNavigate, mobile = false }: { onNavigate?: () => void; mobile?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { creditsRemaining, creditsTotal } = useStudio();
-  const pct = (creditsRemaining / creditsTotal) * 100;
 
   return (
-    <div className="flex h-full flex-col bg-navy text-navy-foreground">
-      <div className="px-6 pt-7 pb-6">
-        <Link to="/" onClick={onNavigate} className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gold font-display text-lg leading-none font-bold text-navy">
-            R
-          </span>
+    <nav className={cn(mobile ? "flex flex-col gap-1" : "flex items-center gap-7 xl:gap-9")} aria-label="Primary navigation">
+      {navItems.map(({ to, label }) => {
+        const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+        return (
+          <Link
+            key={to}
+            to={to}
+            onClick={onNavigate}
+            className={cn(
+              "relative text-sm font-medium text-muted-foreground transition-colors hover:text-navy",
+              mobile ? "rounded-lg px-3 py-3" : "py-2",
+              active && "text-navy",
+              active && !mobile && "after:absolute after:inset-x-0 after:-bottom-2.5 after:h-0.5 after:rounded-full after:bg-navy",
+              active && mobile && "bg-secondary font-semibold",
+            )}
+          >
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
-          <span className="font-display text-lg font-semibold tracking-tight">
-            Replix <span className="text-gold">AI</span>
-          </span>
-        </Link>
-        <p className="mt-1 pl-[3.1rem] text-[0.7rem] tracking-[0.18em] text-navy-foreground/45 uppercase">
-          Ad Studio
-        </p>
-      </div>
+function CreditsPill() {
+  const { creditsRemaining, creditsTotal } = useStudio();
 
-      <nav className="flex-1 space-y-1 px-3">
-        {navItems.map(({ to, label, icon: Icon }) => {
-          const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
-          return (
-            <Link
-              key={to}
-              to={to}
-              onClick={onNavigate}
-              className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                active
-                  ? "bg-gold text-primary-foreground shadow-soft"
-                  : "text-navy-foreground/70 hover:bg-navy-soft hover:text-navy-foreground",
-              )}
-            >
-              <Icon className="h-[1.05rem] w-[1.05rem]" />
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="space-y-3 p-4">
-        <div className="rounded-xl bg-navy-soft/70 p-4">
-          <div className="flex items-baseline justify-between">
-            <span className="text-[0.7rem] tracking-[0.14em] text-navy-foreground/55 uppercase">
-              Credits
-            </span>
-            <span className="font-display text-sm font-semibold text-gold">
-              {creditsRemaining}/{creditsTotal}
-            </span>
-          </div>
-          <Progress value={pct} className="mt-2.5 h-1.5 bg-navy-foreground/15" />
-          <p className="mt-2 text-xs text-navy-foreground/55">Free ads remaining this month</p>
-        </div>
-
-        <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-3 py-2.5">
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
-          <div className="min-w-0">
-            <p className="truncate text-xs font-semibold">{store.name}</p>
-            <p className="truncate text-[0.68rem] text-navy-foreground/55">{store.domain}</p>
-          </div>
-        </div>
-      </div>
+  return (
+    <div className="flex shrink-0 items-center gap-2 rounded-full border border-gold/40 bg-gold-soft px-3.5 py-2 text-navy shadow-soft">
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[0.6rem]" aria-hidden="true">
+        ●
+      </span>
+      <span className="text-sm font-bold tabular-nums">
+        {creditsRemaining}/{creditsTotal}
+      </span>
+      <span className="rounded-full bg-card px-2 py-0.5 text-[0.65rem] font-semibold text-muted-foreground">
+        FREE
+      </span>
     </div>
   );
 }
@@ -113,48 +91,54 @@ export function AppShell({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 lg:block">
-        <SidebarBody />
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur">
-          <div className="flex items-center gap-3 px-5 py-4 sm:px-8">
+    <div className="min-h-screen w-full bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
+        <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between gap-5 px-5 sm:px-8 lg:h-[88px] lg:px-10">
+          <Brand />
+          <div className="hidden lg:block">
+            <NavLinks />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button asChild className="hidden h-11 rounded-full bg-navy px-6 text-navy-foreground shadow-lift hover:bg-navy-soft sm:inline-flex">
+              <Link to="/create">
+                <Sparkles className="h-4 w-4" /> Generate Ads
+              </Link>
+            </Button>
             <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger className="rounded-lg border border-border p-2 lg:hidden">
-                <Menu className="h-4 w-4" />
+              <SheetTrigger className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-navy lg:hidden">
+                <Menu className="h-5 w-5" />
                 <span className="sr-only">Open navigation</span>
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 border-0 p-0">
-                <SidebarBody onNavigate={() => setOpen(false)} />
+              <SheetContent side="right" className="w-[19rem] p-6">
+                <Brand onNavigate={() => setOpen(false)} />
+                <div className="mt-10">
+                  <NavLinks onNavigate={() => setOpen(false)} mobile />
+                </div>
+                <Button asChild className="mt-6 h-11 w-full rounded-full bg-navy text-navy-foreground hover:bg-navy-soft">
+                  <Link to="/create" onClick={() => setOpen(false)}>
+                    <Sparkles className="h-4 w-4" /> Generate Ads
+                  </Link>
+                </Button>
               </SheetContent>
             </Sheet>
-
-            <div className="min-w-0 flex-1">
-              <h1 className="truncate font-display text-xl font-semibold">{title}</h1>
-              {subtitle ? (
-                <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
-              ) : null}
-            </div>
-
-            {action}
-
-            <div className="hidden items-center gap-2.5 sm:flex">
-              <div className="text-right">
-                <p className="text-sm font-semibold">{user.fullName}</p>
-                <p className="text-xs text-muted-foreground">{user.plan} plan</p>
-              </div>
-              <Avatar className="h-9 w-9">
-                <AvatarFallback className="bg-navy text-xs font-semibold text-navy-foreground">
-                  {user.initials}
-                </AvatarFallback>
-              </Avatar>
-            </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="flex-1 px-5 py-7 sm:px-8 sm:py-9">{children}</main>
+      <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+              <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl lg:text-4xl">{title}</h1>
+              {subtitle ? (
+                <p className="mt-1 text-sm text-muted-foreground sm:text-base">{subtitle}</p>
+              ) : null}
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            {action}
+            <CreditsPill />
+          </div>
+        </div>
+        <main>{children}</main>
       </div>
     </div>
   );
