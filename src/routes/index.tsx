@@ -10,6 +10,7 @@ import { products } from "@/data/studio";
 import { fileToDataUrl } from "@/lib/image-utils";
 import { setProductIntake } from "@/lib/product-intake";
 import { useStudio } from "@/lib/studio-store";
+import creditCoin from "@/assets/redesign/credit-coin.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,30 +45,31 @@ function Dashboard() {
 
   return (
     <AppShell title="Generate Ads that stop the scroll. In seconds.">
-      <div className="space-y-10">
+      <div className="space-y-9">
         {connected ? (
           <section>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h2 className="font-display text-2xl font-semibold">Promote Best Sellers</h2>
+                <h2 className="font-display text-xl font-medium">Promote Best Sellers</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Select your Shopify product and generate ads.</p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => setConnected(false)}>Disconnect demo</Button>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+            <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
               {products.map((product) => (
-                <Link key={product.id} to="/create" className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-                  <img src={product.image} alt={product.name} className="aspect-square w-full object-cover transition-transform group-hover:scale-[1.02]" />
-                  <div className="p-4">
-                    <p className="font-display text-sm font-semibold sm:text-base">{product.name}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+                <Link key={product.id} to="/create" className="group overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+                  <div className="relative"><img src={product.image} alt={product.name} className="aspect-square w-full object-cover transition-transform group-hover:scale-[1.02]" /><span className="absolute left-3 top-3 rounded-full bg-navy px-2.5 py-1 text-[0.65rem] font-semibold text-navy-foreground">#{product.rank} Best Seller</span></div>
+                  <div className="p-3.5">
+                    <p className="font-display text-sm font-semibold">{product.name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
+                    <p className="mt-2 text-[0.65rem] text-muted-foreground">{product.bestSellerNote}</p>
                   </div>
                 </Link>
               ))}
             </div>
           </section>
         ) : (
-          <section className="overflow-hidden rounded-3xl bg-success px-6 py-12 text-center text-navy-foreground sm:px-12">
+          <section className="overflow-hidden rounded-3xl bg-success px-6 py-10 text-center text-navy-foreground sm:px-12">
             <Store className="mx-auto h-11 w-11" />
             <h2 className="mt-4 font-display text-2xl font-semibold sm:text-3xl">Connect Your Shopify Store</h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-navy-foreground/80">Sync your Shopify catalog and create studio-quality ads with optimized copy in under 60 seconds.</p>
@@ -78,14 +80,14 @@ function Dashboard() {
         <div className="flex items-center gap-5"><span className="h-px flex-1 bg-border" /><span className="text-xs font-semibold text-muted-foreground">OR</span><span className="h-px flex-1 bg-border" /></div>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-12 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary"><Upload className="h-6 w-6 text-navy" /></span>
+          <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-10 text-center">
+            <img src={products[0].image} alt="Product upload example" className="h-24 w-24 rotate-[-6deg] rounded-2xl border-4 border-secondary object-cover shadow-soft" />
             <h2 className="mt-6 font-display text-xl font-semibold">Upload Product Image</h2>
             <p className="mt-2 text-sm text-muted-foreground">Use JPG, PNG, or WEBP (max 10 MB).</p>
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => void chooseUpload(e.target.files?.[0])} />
             <Button variant="outline" className="mt-6 rounded-full px-6" onClick={() => inputRef.current?.click()}><Upload /> Upload Image</Button>
           </div>
-          <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-12 text-center">
+          <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-10 text-center">
             <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy"><Link2 className="h-6 w-6 text-gold" /></span>
             <h2 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h2>
             <div className="mt-6 flex w-full max-w-md rounded-full border border-input bg-background p-1.5 pl-4">
@@ -96,13 +98,13 @@ function Dashboard() {
         </section>
 
         <section>
-          <div className="mb-6 flex items-center justify-between gap-4"><h2 className="font-display text-2xl font-semibold">Recent Generated Ads</h2><Button asChild variant="outline" className="rounded-full"><Link to="/gallery">View All</Link></Button></div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{ads.slice(0, 3).map((ad) => <AdCard key={ad.id} ad={ad} compact />)}</div>
+          <div className="mb-5 flex items-center justify-between gap-4"><h2 className="font-display text-xl font-medium">Recent Generated Ads</h2><Button asChild variant="outline" className="rounded-full"><Link to="/gallery">View All</Link></Button></div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{ads.slice(0, 3).map((ad) => <AdCard key={ad.id} ad={ad} />)}</div>
         </section>
 
         <section className="flex flex-col justify-between gap-8 rounded-3xl border border-border bg-card p-8 sm:flex-row sm:items-center lg:p-10">
           <div><span className="rounded-full border border-navy bg-secondary px-3 py-1.5 text-xs font-semibold">Refer &amp; Earn</span><h2 className="mt-5 font-display text-2xl font-semibold">Give 10 Credits, Get 10 Credits</h2><p className="mt-2 text-sm text-muted-foreground">Share your link. When a friend signs up, you both get 10 free credits.</p><Button variant="outline" className="mt-6 rounded-full" onClick={() => { void navigator.clipboard.writeText("https://replixai.co.uk/login?ref=GQZXXLMB"); toast.success("Referral link copied"); }}><Copy /> Copy referral link</Button></div>
-          <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gold-soft text-5xl font-bold text-gold">R</div>
+          <div className="relative h-32 w-40 shrink-0"><img src={creditCoin} alt="Replix credit" className="absolute left-0 top-0 h-24 w-24" /><img src={creditCoin} alt="" className="absolute bottom-0 right-0 h-20 w-20" /><img src={creditCoin} alt="" className="absolute right-1 top-0 h-12 w-12" /></div>
         </section>
       </div>
     </AppShell>

@@ -10,4 +10,4 @@ export const Route = createFileRoute("/campaigns")({ head: () => ({ meta: [
   { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: Campaigns });
 
-function Campaigns() { return <AppShell title="My Campaigns" subtitle="Grouped creatives you can reuse campaign to campaign" action={<Button asChild variant="navy" className="hidden rounded-full sm:inline-flex"><Link to="/gallery"><Plus /> New Collection</Link></Button>}><CampaignsView /></AppShell>; }
+function Campaigns() { return <AppShell title="My Campaigns" subtitle="Grouped creatives you can reuse campaign to campaign" action={<Button asChild variant="navy" className="hidden rounded-full px-7 sm:inline-flex"><Link to="/gallery"><Plus /> Create Your First Collection</Link></Button>}><CampaignsView /></AppShell>; }

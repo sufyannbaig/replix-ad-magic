@@ -133,7 +133,7 @@ export function AdCard({
           <img
             src={ad.image}
             alt={ad.headline}
-            loading="lazy"
+            loading="eager"
             className={cn(
               "w-full object-cover",
               aspectClass,
@@ -176,7 +176,7 @@ export function AdCard({
         ) : null}
       </div>
 
-      <div className="space-y-3 p-4">
+      <div className="space-y-3 p-3.5">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="text-[0.65rem] font-medium">
             {themeLabel(ad.theme)}
@@ -218,7 +218,7 @@ export function AdCard({
           </div>
         ) : (
           <div className="space-y-1.5">
-            <h3 className="font-display text-base leading-snug font-semibold">{ad.headline}</h3>
+            <h3 className="font-display text-sm leading-snug font-semibold">{ad.headline}</h3>
             <p className="text-xs leading-relaxed text-muted-foreground">{ad.caption}</p>
             <p className="pt-1 text-xs font-semibold text-navy">
               CTA button: <span className="text-primary">{ad.cta}</span>

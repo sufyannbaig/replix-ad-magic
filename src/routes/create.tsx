@@ -1066,7 +1066,7 @@ function CreateAd() {
           <section className="space-y-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="font-display text-xl font-semibold">Pick a product</h2>
+                <h2 className="font-display text-xl font-medium">Pick a product</h2>
                 <p className="text-sm text-muted-foreground">
                   Pulled live from your store, ranked by best seller — or start from any photo.
                 </p>
@@ -1096,14 +1096,14 @@ function CreateAd() {
             </div>
 
             {mode === "product" ? (
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {products.map((product) => (
                   <button
                     key={product.id}
                     disabled={preparing !== null}
                     onClick={() => void pickProduct(product.id)}
                     className={cn(
-                      "card-soft overflow-hidden text-left transition-all hover:-translate-y-0.5 hover:shadow-lift",
+                      "overflow-hidden rounded-xl border border-border bg-card text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift",
                       subject?.id === product.id && "ring-2 ring-primary",
                     )}
                   >
@@ -1123,10 +1123,10 @@ function CreateAd() {
                         </span>
                       ) : null}
                     </div>
-                    <div className="space-y-1 p-4">
-                      <p className="font-display font-semibold">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
-                      <p className="pt-1 text-xs text-muted-foreground">{product.bestSellerNote}</p>
+                    <div className="space-y-1 p-3.5">
+                      <p className="font-display text-sm font-semibold">{product.name}</p>
+                      <p className="text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
+                      <p className="pt-1 text-[0.65rem] text-muted-foreground">{product.bestSellerNote}</p>
                     </div>
                   </button>
                 ))}
