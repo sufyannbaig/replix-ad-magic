@@ -45,6 +45,7 @@
   --color-navy: var(--navy);
   --color-navy-soft: var(--navy-soft);
   --color-navy-foreground: var(--navy-foreground);
+  --color-navy-bright: var(--navy-bright);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
   --color-success: var(--success);
@@ -69,7 +70,7 @@
 }
 
 :root {
-  --radius: 0.875rem;
+  --radius: 0.75rem;
 
   --background: oklch(0.977 0.008 95);
   --foreground: oklch(0.256 0.055 265);
@@ -95,6 +96,7 @@
 
   --navy: oklch(0.256 0.055 265);
   --navy-soft: oklch(0.32 0.05 265);
+  --navy-bright: oklch(0.5 0.15 260);
   --navy-foreground: oklch(0.977 0.008 95);
   --gold: oklch(0.769 0.135 74);
   --gold-soft: oklch(0.93 0.05 84);
@@ -152,7 +154,7 @@
   h4,
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 }
 

@@ -8,25 +8,26 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
+import creditCoin from "@/assets/redesign/credit-coin.png";
 
-type NavItem = { to: "/" | "/gallery" | "/campaigns" | "/analytics" | "/billing" | "/help"; label: string };
+type NavItem = { to: "/" | "/gallery" | "/campaigns" | "/analytics" | "/pricing" | "/help"; label: string };
 
 const navItems: NavItem[] = [
   { to: "/", label: "Dashboard" },
   { to: "/gallery", label: "My Creatives" },
   { to: "/campaigns", label: "My Campaigns" },
   { to: "/analytics", label: "Analytics" },
-  { to: "/billing", label: "Pricing & Billing" },
+  { to: "/pricing", label: "Pricing & Billing" },
   { to: "/help", label: "Help" },
 ];
 
 function Brand({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center gap-3" aria-label="Replix AI dashboard">
-      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy font-display text-xl font-bold text-gold">
+      <span className="flex h-10 w-10 items-center justify-center bg-navy font-display text-xl font-bold text-gold">
         R
       </span>
-      <span className="font-display text-base font-bold text-navy">REPLIX AI</span>
+      <span className="font-display text-base font-bold tracking-[0.2em] text-navy">REPLIX AI</span>
     </Link>
   );
 }
@@ -63,10 +64,8 @@ function CreditsPill() {
   const { creditsRemaining, creditsTotal } = useStudio();
 
   return (
-    <div className="flex shrink-0 items-center gap-2 rounded-full border border-gold/40 bg-gold-soft px-3.5 py-2 text-navy shadow-soft">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[0.6rem]" aria-hidden="true">
-        ●
-      </span>
+    <div className="flex shrink-0 items-center gap-2 rounded-full border border-gold/60 bg-gold-soft/60 px-3 py-1.5 text-navy">
+      <img src={creditCoin} alt="" className="h-5 w-5" />
       <span className="text-sm font-bold tabular-nums">
         {creditsRemaining}/{creditsTotal}
       </span>
@@ -93,13 +92,13 @@ export function AppShell({
   return (
     <div className="min-h-screen w-full bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
-        <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between gap-5 px-5 sm:px-8 lg:h-[88px] lg:px-10">
+        <div className="mx-auto flex h-[76px] max-w-[1240px] items-center justify-between gap-5 px-5 sm:px-8 lg:h-[88px] lg:px-10">
           <Brand />
           <div className="hidden lg:block">
             <NavLinks />
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild className="hidden h-11 rounded-full bg-navy px-6 text-navy-foreground shadow-lift hover:bg-navy-soft sm:inline-flex">
+            <Button asChild variant="gradient" className="hidden h-11 rounded-full px-7 sm:inline-flex">
               <Link to="/create">
                 <Sparkles className="h-4 w-4" /> Generate Ads
               </Link>
@@ -125,10 +124,10 @@ export function AppShell({
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-[1440px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
-        <div className="mb-8 flex items-start justify-between gap-4">
+      <div className="mx-auto w-full max-w-[1104px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
+        <div className={cn("flex items-start justify-between gap-4", title || subtitle ? "mb-7" : "mb-5")}>
           <div className="min-w-0 flex-1">
-              <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl lg:text-4xl">{title}</h1>
+              {title ? <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">{title}</h1> : null}
               {subtitle ? (
                 <p className="mt-1 text-sm text-muted-foreground sm:text-base">{subtitle}</p>
               ) : null}
