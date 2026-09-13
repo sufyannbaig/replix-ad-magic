@@ -55,6 +55,7 @@ import { analyzeProductImage, generateAdCopy, renderAdImage, resolveProductUrl, 
 import { saveAd } from "@/lib/ads-repo";
 import { downloadImage, fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
+import { takeProductIntake } from "@/lib/product-intake";
 import { cn } from "@/lib/utils";
 import themeBeforeAfter from "@/assets/theme-before-after.jpg";
 import themeBoldClaim from "@/assets/theme-bold-claim.jpg";
@@ -851,6 +852,16 @@ function CreateAd() {
   useEffect(() => {
     if (step > 1 && !subject) setStep(1);
   }, [step, subject]);
+
+  useEffect(() => {
+    const intake = takeProductIntake();
+    if (!intake) return;
+    if (intake.kind === "upload") {
+      startUpload({ id: `upload-${Date.now()}`, name: intake.name || "Your product", displayImage: intake.dataUrl, dataUrl: intake.dataUrl, source: "upload" });
+      return;
+    }
+    setMode("url");
+  }, []);
 
 
 

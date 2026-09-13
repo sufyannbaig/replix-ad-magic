@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { products } from "@/data/studio";
 import { fileToDataUrl } from "@/lib/image-utils";
+import { setProductIntake } from "@/lib/product-intake";
 import { useStudio } from "@/lib/studio-store";
 
 export const Route = createFileRoute("/")({
@@ -33,8 +34,9 @@ function Dashboard() {
   const chooseUpload = async (file?: File) => {
     if (!file) return;
     try {
-      await fileToDataUrl(file);
-      window.location.assign("/create?source=upload");
+      const dataUrl = await fileToDataUrl(file);
+      setProductIntake({ kind: "upload", name: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "), dataUrl });
+      window.location.assign("/create");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "We couldn't read that image.");
     }
@@ -88,7 +90,7 @@ function Dashboard() {
             <h2 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h2>
             <div className="mt-6 flex w-full max-w-md rounded-full border border-input bg-background p-1.5 pl-4">
               <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourstore.com/products/..." className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none" />
-              <Button className="rounded-full" onClick={() => url.trim() ? window.location.assign(`/create?source=url&url=${encodeURIComponent(url.trim())}`) : toast.error("Enter a product URL first.")}>Analyze</Button>
+              <Button className="rounded-full" onClick={() => { if (!url.trim()) { toast.error("Enter a product URL first."); return; } setProductIntake({ kind: "url", url: url.trim() }); window.location.assign("/create"); }}>Analyze</Button>
             </div>
           </div>
         </section>
