@@ -1046,7 +1046,10 @@ function CreateAd() {
   };
 
   return (
-    <AppShell title={step === 1 ? "Generate Ads that stop the scroll. In seconds." : "Generate Ad"} subtitle={step === 1 ? undefined : "From product to ready-to-run creatives in seconds."}>
+    <AppShell
+      title={step === 1 ? "Generate Ads that stop the scroll. In seconds." : "Generate Ad"}
+      {...(step === 1 ? {} : { subtitle: "From product to ready-to-run creatives in seconds." })}
+    >
       <div className="space-y-7">
         {step === 1 ? (
           <section className="space-y-5">
