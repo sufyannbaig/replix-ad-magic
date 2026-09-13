@@ -125,9 +125,9 @@ export function AppShell({
       </header>
 
       <div className="mx-auto w-full max-w-[1104px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
-        <div className="mb-7 flex items-start justify-between gap-4">
+        <div className={cn("flex items-start justify-between gap-4", title || subtitle ? "mb-7" : "mb-5")}>
           <div className="min-w-0 flex-1">
-              <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">{title}</h1>
+              {title ? <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">{title}</h1> : null}
               {subtitle ? (
                 <p className="mt-1 text-sm text-muted-foreground sm:text-base">{subtitle}</p>
               ) : null}
