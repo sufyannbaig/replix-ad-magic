@@ -1,10 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
-  Sparkles,
   Images,
-  FolderOpen,
-  Tag,
+  Megaphone,
+  ChartNoAxesCombined,
   CreditCard,
   LifeBuoy,
   Menu,
@@ -23,11 +22,10 @@ type NavItem = { to: string; label: string; icon: LucideIcon };
 
 const navItems: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/create", label: "Create Ad", icon: Sparkles },
-  { to: "/gallery", label: "Ad Gallery", icon: Images },
-  { to: "/collections", label: "Collections", icon: FolderOpen },
-  { to: "/pricing", label: "Pricing", icon: Tag },
-  { to: "/billing", label: "Billing", icon: CreditCard },
+  { to: "/gallery", label: "My Creatives", icon: Images },
+  { to: "/campaigns", label: "My Campaigns", icon: Megaphone },
+  { to: "/analytics", label: "Analytics", icon: ChartNoAxesCombined },
+  { to: "/billing", label: "Pricing & Billing", icon: CreditCard },
   { to: "/help", label: "Help", icon: LifeBuoy },
 ];
 
