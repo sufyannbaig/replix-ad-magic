@@ -1,87 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/pricing")({
-  head: () => ({
-    meta: [
-      { title: "Pricing — Replix AI Ad Studio" },
-      {
-        name: "description",
-        content:
-          "Simple monthly plans for Replix AI: start free with 100 ads a month and scale to unlimited creative batches.",
-      },
-      { property: "og:title", content: "Pricing — Replix AI Ad Studio" },
-      {
-        property: "og:description",
-        content: "Free, Growth and Studio plans for Shopify sellers generating ad creatives.",
-      },
-    ],
-  }),
-  component: Pricing,
-});
+export const Route = createFileRoute("/pricing")({ head: () => ({ meta: [
+  { title: "Pricing — Replix AI Ad Studio" }, { name: "description", content: "Compare Replix AI plans for Shopify brands creating ads at every scale." },
+  { property: "og:title", content: "Pricing — Replix AI Ad Studio" }, { property: "og:description", content: "Compare Replix AI ad generation plans." },
+  { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+] }), component: Pricing });
 
 const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    note: "Current plan",
-    features: ["100 ads per month", "Instagram + Facebook formats", "1 connected store"],
-    current: true,
-  },
-  {
-    name: "Growth",
-    price: "$39",
-    note: "Most popular",
-    features: ["1,000 ads per month", "Collections and batch export", "Priority generation queue"],
-    current: false,
-  },
-  {
-    name: "Studio",
-    price: "$99",
-    note: "For agencies",
-    features: ["Unlimited ads", "5 connected stores", "Brand voice training"],
-    current: false,
-  },
+  { name: "Starter", tagline: "For small Shopify brands", price: "$9.99", features: ["30 AI generations/month", "All creative styles", "Edit captions & hooks", "Basic Brand DNA", "High-quality downloads"] },
+  { name: "Pro", tagline: "For growing Shopify brands", price: "$29", popular: true, features: ["100 AI generations/month", "Advanced Brand DNA", "Multiple creative concepts", "Premium creative styles", "Full creative library"] },
+  { name: "Scale", tagline: "For brands creating ads at scale", price: "$59", features: ["300 AI generations/month", "Advanced Brand DNA", "Multiple products", "Unlimited creative styles", "Priority support"] },
 ];
 
-function Pricing() {
-  return (
-    <AppShell title="Pricing" subtitle="Upgrade when you run out of free credits">
-      <div className="grid gap-5 lg:grid-cols-3">
-        {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className={cn("card-soft p-7", plan.name === "Growth" && "ring-2 ring-primary")}
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">{plan.name}</h2>
-              <Badge variant={plan.current ? "secondary" : "default"}>{plan.note}</Badge>
-            </div>
-            <p className="mt-4 font-display text-3xl font-semibold">
-              {plan.price}
-              <span className="text-sm font-normal text-muted-foreground">/month</span>
-            </p>
-            <ul className="mt-5 space-y-2.5">
-              {plan.features.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-success" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Button className="mt-6 w-full" variant={plan.current ? "outline" : "default"} disabled>
-              {plan.current ? "Your plan" : "Coming soon"}
-            </Button>
-          </div>
-        ))}
-      </div>
-      <p className="mt-6 text-sm text-muted-foreground">
-        Checkout is intentionally disabled in this prototype.
-      </p>
-    </AppShell>
-  );
-}
+function Pricing() { return <AppShell title="Pricing & Billing" subtitle="A plan for every stage of your brand.">
+  <section className="mb-10 rounded-3xl border border-gold/40 bg-gold-soft px-8 py-12 text-center"><Badge variant="outline">Exclusive · Limited Time</Badge><h2 className="mt-4 font-display text-3xl font-bold text-navy">Free Launch Offer — 100 FREE AI ads</h2><p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">Claim your free account and get 100 AI-generated Shopify ads, completely free. No subscription or card required.</p><Button asChild variant="navy" className="mt-6 rounded-full"><Link to="/create">Claim 100 free ads</Link></Button></section>
+  <h2 className="mb-6 font-display text-3xl font-semibold">Pricing Plans</h2><div className="grid gap-6 lg:grid-cols-3">{plans.map((plan) => <article key={plan.name} className={cn("relative flex flex-col rounded-2xl border bg-card p-8 shadow-soft", plan.popular ? "border-navy" : "border-border")}>{plan.popular ? <Badge className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-navy text-navy-foreground">Most Popular</Badge> : null}<div className="text-center"><h3 className="font-display text-xl font-semibold">{plan.name}</h3><p className="mt-1 text-sm text-muted-foreground">{plan.tagline}</p><p className="mt-6 font-display text-3xl font-bold text-navy">{plan.price} <span className="text-sm font-normal text-muted-foreground">/month</span></p><Button disabled variant={plan.popular ? "navy" : "outline"} className="mt-6 w-full">Coming soon</Button></div><div className="my-6 h-px bg-border" /><ul className="space-y-3">{plan.features.map((feature) => <li key={feature} className="flex gap-2 text-sm"><Check className="mt-0.5 h-4 w-4 text-success" />{feature}</li>)}</ul></article>)}</div>
+  <div className="mt-10 flex items-center justify-between rounded-3xl border border-border bg-card p-8"><div><p className="text-sm text-muted-foreground">Current Plan</p><p className="mt-1 font-display text-3xl font-bold">Free</p><p className="mt-2 text-sm text-muted-foreground">100 credits remaining</p></div><Button asChild variant="outline" className="rounded-full"><Link to="/billing">View billing details</Link></Button></div>
+  </AppShell>; }

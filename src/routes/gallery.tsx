@@ -1,121 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, Images, Instagram, Facebook } from "lucide-react";
+import { Images } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
 import { EmptyState } from "@/components/EmptyState";
-
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStudio } from "@/lib/studio-store";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/gallery")({
-  head: () => ({
-    meta: [
-      { title: "Ad Gallery — Replix AI Ad Studio" },
-      {
-        name: "description",
-        content:
-          "Every Zaffo Coffee creative in one place — search by product or hook and filter by Instagram or Facebook.",
-      },
-      { property: "og:title", content: "Ad Gallery — Replix AI Ad Studio" },
-      {
-        property: "og:description",
-        content: "Browse, search and filter all of your generated ad creatives.",
-      },
-    ],
-  }),
-  component: Gallery,
+  head: () => ({ meta: [
+    { title: "My Creatives — Replix AI Ad Studio" },
+    { name: "description", content: "Browse and manage every ad creative Replix AI has generated for your store." },
+    { property: "og:title", content: "My Creatives — Replix AI Ad Studio" },
+    { property: "og:description", content: "Browse and manage every generated ad creative." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  ] }), component: Gallery,
 });
+
+const filters = [{ id: "all", label: "All Creatives" }, { id: "facebook", label: "Facebook" }, { id: "instagram", label: "Instagram" }] as const;
 
 function Gallery() {
   const { ads } = useStudio();
-  const [query, setQuery] = useState("");
-  const [platform, setPlatform] = useState("all");
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return ads.filter((ad) => {
-      const matchesPlatform = platform === "all" || ad.platform === platform;
-      const matchesQuery =
-        !q ||
-        [ad.headline, ad.caption, ad.productName, ad.audience].some((f) =>
-          f.toLowerCase().includes(q),
-        );
-      return matchesPlatform && matchesQuery;
-    });
-  }, [ads, query, platform]);
-
-  const tiles = [
-    { label: "Total Ads", value: ads.length, icon: Images },
-    { label: "Instagram", value: ads.filter((a) => a.platform === "instagram").length, icon: Instagram },
-    { label: "Facebook", value: ads.filter((a) => a.platform === "facebook").length, icon: Facebook },
-  ];
-
-  if (!ads.length) {
-    return (
-      <AppShell title="Ad Gallery" subtitle="Every creative Replix has made for Zaffo Coffee">
-        <EmptyState
-          icon={Images}
-          title="No creatives yet"
-          body="Your gallery fills up automatically. Pick a product, let Replix study it, and every concept it generates lands here — searchable and filterable by platform."
-        />
-      </AppShell>
-    );
-  }
-
-  return (
-    <AppShell title="Ad Gallery" subtitle="Every creative Replix has made for Zaffo Coffee">
-      <div className="space-y-7">
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
-          {tiles.map(({ label, value, icon: Icon }) => (
-            <div
-              key={label}
-              className="card-soft flex flex-col items-start gap-2 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5"
-            >
-              <span className="rounded-xl bg-gold-soft p-2 text-navy sm:p-2.5">
-                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-              </span>
-              <div className="min-w-0">
-                <p className="font-display text-xl font-semibold sm:text-2xl">{value}</p>
-                <p className="truncate text-xs text-muted-foreground sm:text-sm">{label}</p>
-              </div>
-            </div>
-          ))}
-
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search hooks, products, audiences"
-              className="pl-9"
-            />
-          </div>
-          <Tabs value={platform} onValueChange={setPlatform}>
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="instagram">Instagram</TabsTrigger>
-              <TabsTrigger value="facebook">Facebook</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {filtered.length ? (
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((ad) => (
-              <AdCard key={ad.id} ad={ad} />
-            ))}
-          </div>
-        ) : (
-          <p className="card-soft p-10 text-center text-sm text-muted-foreground">
-            No creatives match that search yet.
-          </p>
-        )}
+  const [platform, setPlatform] = useState<(typeof filters)[number]["id"]>("all");
+  const filtered = useMemo(() => platform === "all" ? ads : ads.filter((ad) => ad.platform === platform), [ads, platform]);
+  return <AppShell title="My Creatives" subtitle="Every creative Replix has made for you.">
+    <div className="space-y-8">
+      <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-card p-1.5">
+        {filters.map((filter) => <button key={filter.id} onClick={() => setPlatform(filter.id)} className={cn("shrink-0 rounded-full px-5 py-2.5 text-sm transition-colors", platform === filter.id ? "bg-navy text-navy-foreground" : "text-muted-foreground hover:bg-secondary")}>{filter.label}</button>)}
       </div>
-    </AppShell>
-  );
+      {filtered.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{filtered.map((ad) => <AdCard key={ad.id} ad={ad} />)}</div> : <EmptyState icon={Images} title="No creatives yet" body="Your generated ads will appear here automatically." />}
+    </div>
+  </AppShell>;
 }

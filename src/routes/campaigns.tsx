@@ -1,41 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Megaphone } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { CampaignsView } from "@/components/CampaignsView";
+import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/campaigns")({
-  head: () => ({
-    meta: [
-      { title: "My Campaigns — Replix AI Ad Studio" },
-      {
-        name: "description",
-        content: "Create and manage your Replix AI advertising campaigns.",
-      },
-      { property: "og:title", content: "My Campaigns — Replix AI Ad Studio" },
-      {
-        property: "og:description",
-        content: "Create and manage your Replix AI advertising campaigns.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Campaigns,
-});
+export const Route = createFileRoute("/campaigns")({ head: () => ({ meta: [
+  { title: "My Campaigns — Replix AI Ad Studio" }, { name: "description", content: "Organize saved Replix ad creatives into reusable campaign collections." },
+  { property: "og:title", content: "My Campaigns — Replix AI Ad Studio" }, { property: "og:description", content: "Organize generated creatives into campaign collections." },
+  { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+] }), component: Campaigns });
 
-function Campaigns() {
-  return (
-    <AppShell title="My Campaigns" subtitle="Plan, organize and track your campaigns">
-      <div className="flex min-h-[24rem] items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
-        <div className="max-w-sm">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gold-soft text-navy">
-            <Megaphone className="h-5 w-5" />
-          </span>
-          <h2 className="mt-4 font-display text-xl font-semibold text-foreground">Coming soon</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Campaign planning and management will be available here soon.
-          </p>
-        </div>
-      </div>
-    </AppShell>
-  );
-}
+function Campaigns() { return <AppShell title="My Campaigns" subtitle="Grouped creatives you can reuse campaign to campaign" action={<Button asChild variant="navy" className="hidden rounded-full sm:inline-flex"><Link to="/gallery"><Plus /> New Collection</Link></Button>}><CampaignsView /></AppShell>; }
