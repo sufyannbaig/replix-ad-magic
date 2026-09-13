@@ -17,6 +17,7 @@ import {
   ImagePlus,
   Pencil,
   LayoutGrid,
+  Link2,
   X,
 } from "lucide-react";
 
@@ -50,7 +51,7 @@ import {
   type Platform,
   type ThemeId,
 } from "@/data/studio";
-import { analyzeProductImage, generateAdCopy, renderAdImage, type ProductAnalysis } from "@/lib/ai.functions";
+import { analyzeProductImage, generateAdCopy, renderAdImage, resolveProductUrl, type ProductAnalysis } from "@/lib/ai.functions";
 import { saveAd } from "@/lib/ads-repo";
 import { downloadImage, fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
@@ -113,7 +114,7 @@ type Subject = {
   displayImage: string;
   /** The real reference photo handed to the AI. */
   dataUrl: string;
-  source: "shopify" | "upload";
+  source: "shopify" | "upload" | "url";
 };
 
 function StepRail({ step }: { step: number }) {
@@ -746,6 +747,45 @@ function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
   );
 }
 
+function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
+  const [url, setUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const analyze = async () => {
+    if (!url.trim()) {
+      toast.error("Enter a product URL first.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const resolved = await resolveProductUrl({ data: { url: url.trim() } });
+      onReady({
+        id: `url-${Date.now()}`,
+        name: resolved.name,
+        displayImage: resolved.imageUrl,
+        dataUrl: resolved.dataUrl,
+        source: "url",
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "We could not analyze that product URL.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-16 text-center">
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy text-gold"><Link2 className="h-6 w-6" /></span>
+      <h3 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h3>
+      <p className="mt-2 text-sm text-muted-foreground">Paste a public product page and we’ll use its primary image.</p>
+      <div className="mt-6 flex w-full max-w-lg rounded-full border border-input bg-background p-1.5 pl-4">
+        <Input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://yourstore.com/products/..." className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none" />
+        <Button className="rounded-full" disabled={busy} onClick={() => void analyze()}>{busy ? <Loader2 className="animate-spin" /> : <Sparkles />} Analyze</Button>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Wizard progress lives outside the component so a remount of the page (hot
  * reload, a re-render of the shell, a stray error boundary reset) can never
@@ -753,7 +793,7 @@ function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
  */
 type WizardCache = {
   step: number;
-  mode: "product" | "upload";
+  mode: "product" | "upload" | "url";
   subject: Subject | null;
   analysis: ProductAnalysis | null;
   themeIds: ThemeId[];
@@ -778,7 +818,7 @@ const wizardCache: WizardCache = {
 function CreateAd() {
   const { addAds, replaceAd, removeAd, spendCredits } = useStudio();
   const [step, setStep] = useState(wizardCache.step);
-  const [mode, setMode] = useState<"product" | "upload">(wizardCache.mode);
+  const [mode, setMode] = useState<"product" | "upload" | "url">(wizardCache.mode);
   const [subject, setSubject] = useState<Subject | null>(wizardCache.subject);
   const [preparing, setPreparing] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<ProductAnalysis | null>(wizardCache.analysis);
@@ -1006,11 +1046,10 @@ function CreateAd() {
   };
 
   return (
-    <AppShell title="Create Ad" subtitle="From product to ready-to-run creatives">
+    <AppShell title={step === 1 ? "Generate Ads that stop the scroll. In seconds." : "Generate Ad"} subtitle={step === 1 ? undefined : "From product to ready-to-run creatives in seconds."}>
       <div className="space-y-7">
         {step === 1 ? (
           <section className="space-y-5">
-            <StepRail step={step} />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className="font-display text-xl font-semibold">Pick a product</h2>
@@ -1021,8 +1060,9 @@ function CreateAd() {
               <div className="flex gap-1 rounded-full border border-border bg-card p-1">
                 {(
                   [
-                    { id: "product", label: "Pick a Shopify product", icon: Store },
-                    { id: "upload", label: "Upload an image", icon: Upload },
+                    { id: "product", label: "Shopify Product", icon: Store },
+                    { id: "upload", label: "Upload Image", icon: Upload },
+                    { id: "url", label: "Product URL", icon: Link2 },
                   ] as const
                 ).map(({ id, label, icon: Icon }) => (
                   <button
@@ -1077,8 +1117,10 @@ function CreateAd() {
                   </button>
                 ))}
               </div>
-            ) : (
+            ) : mode === "upload" ? (
               <UploadPanel onReady={startUpload} />
+            ) : (
+              <ProductUrlPanel onReady={startUpload} />
             )}
           </section>
         ) : null}
@@ -1092,9 +1134,7 @@ function CreateAd() {
               <h2 className="font-display text-2xl font-semibold">Create a new ad</h2>
             </div>
 
-            <StepRail step={step} />
-
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_auto_minmax(280px,1fr)]">
               <div className="space-y-3">
                 <h3 className="font-display text-lg font-semibold">Product</h3>
                 <ProductPanel
@@ -1109,6 +1149,8 @@ function CreateAd() {
                   }}
                 />
               </div>
+
+              <div className="hidden items-center justify-center pt-16 lg:flex"><span className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card shadow-soft"><Plus className="h-5 w-5 text-navy" /></span></div>
 
               <div className="space-y-3">
                 <div className="flex items-baseline justify-between">
