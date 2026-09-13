@@ -10,14 +10,14 @@ import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
 import creditCoin from "@/assets/redesign/credit-coin.png";
 
-type NavItem = { to: "/" | "/gallery" | "/campaigns" | "/analytics" | "/billing" | "/help"; label: string };
+type NavItem = { to: "/" | "/gallery" | "/campaigns" | "/analytics" | "/pricing" | "/help"; label: string };
 
 const navItems: NavItem[] = [
   { to: "/", label: "Dashboard" },
   { to: "/gallery", label: "My Creatives" },
   { to: "/campaigns", label: "My Campaigns" },
   { to: "/analytics", label: "Analytics" },
-  { to: "/billing", label: "Pricing & Billing" },
+  { to: "/pricing", label: "Pricing & Billing" },
   { to: "/help", label: "Help" },
 ];
 

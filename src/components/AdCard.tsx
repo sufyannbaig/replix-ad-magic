@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { themes, type Ad, type Platform } from "@/data/studio";
+import { adScenes, themes, type Ad, type Platform } from "@/data/studio";
 import { useStudio } from "@/lib/studio-store";
 import { downloadImage } from "@/lib/image-utils";
 import { cn } from "@/lib/utils";
@@ -97,6 +97,7 @@ export function AdCard({
   const [caption, setCaption] = useState(ad.caption);
   const [cta, setCta] = useState(ad.cta);
   const [regenerating, setRegenerating] = useState(false);
+  const fallbackImage = adScenes[Math.abs(ad.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0)) % adScenes.length]?.src;
 
   const aspectClass =
     ad.format === "9:16" ? "aspect-[9/16]" : ad.format === "4:5" ? "aspect-[4/5]" : "aspect-square";
@@ -134,6 +135,9 @@ export function AdCard({
             src={ad.image}
             alt={ad.headline}
             loading="eager"
+            onError={(event) => {
+              if (fallbackImage && event.currentTarget.src !== fallbackImage) event.currentTarget.src = fallbackImage;
+            }}
             className={cn(
               "w-full object-cover",
               aspectClass,

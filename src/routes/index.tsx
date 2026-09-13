@@ -81,7 +81,7 @@ function Dashboard() {
 
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-10 text-center">
-            <img src={products[0].image} alt="Product upload example" className="h-24 w-24 rotate-[-6deg] rounded-2xl border-4 border-secondary object-cover shadow-soft" />
+            <img src={products[0]?.image ?? ""} alt="Product upload example" className="h-24 w-24 rotate-[-6deg] rounded-2xl border-4 border-secondary object-cover shadow-soft" />
             <h2 className="mt-6 font-display text-xl font-semibold">Upload Product Image</h2>
             <p className="mt-2 text-sm text-muted-foreground">Use JPG, PNG, or WEBP (max 10 MB).</p>
             <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => void chooseUpload(e.target.files?.[0])} />
