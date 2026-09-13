@@ -1,7 +1,7 @@
 # Replix AI redesign roadmap
 
 - [x] Approve route-by-route implementation plan
-- [ ] Stage 1: Global top navigation shell and live credit pill
+- [x] Stage 1: Global top navigation shell and live credit pill
 - [ ] Stage 2: Dashboard connected / not-connected states
 - [ ] Stage 3: Generate Ads outer and inner screens
 - [ ] Stage 4: My Creatives
