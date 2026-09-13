@@ -6,10 +6,22 @@ let pendingIntake: ProductIntake | null = null;
 
 export function setProductIntake(intake: ProductIntake) {
   pendingIntake = intake;
+  if (typeof window !== "undefined") window.sessionStorage.setItem("replix-product-intake", JSON.stringify(intake));
 }
 
 export function takeProductIntake() {
-  const intake = pendingIntake;
+  let intake = pendingIntake;
+  if (!intake && typeof window !== "undefined") {
+    const stored = window.sessionStorage.getItem("replix-product-intake");
+    if (stored) {
+      try {
+        intake = JSON.parse(stored) as ProductIntake;
+      } catch {
+        intake = null;
+      }
+    }
+  }
   pendingIntake = null;
+  if (typeof window !== "undefined") window.sessionStorage.removeItem("replix-product-intake");
   return intake;
 }
