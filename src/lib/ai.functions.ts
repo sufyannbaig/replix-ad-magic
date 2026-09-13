@@ -56,6 +56,35 @@ const analyzeInput = z.object({
   storeName: z.string().optional(),
 });
 
+const productUrlInput = z.object({ url: z.string().url() });
+
+export const resolveProductUrl = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => productUrlInput.parse(data))
+  .handler(async ({ data }) => {
+    const pageUrl = new URL(data.url);
+    if (!/^https?:$/.test(pageUrl.protocol)) throw new Error("Enter a public http or https product URL.");
+    const page = await fetch(pageUrl, { headers: { "user-agent": "Mozilla/5.0 ReplixAI/1.0" } });
+    if (!page.ok) throw new Error("We could not open that product page.");
+    const html = await page.text();
+    const imageMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]+content=["']([^"']+)["']/i)
+      ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|twitter:image)["']/i);
+    const titleMatch = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)
+      ?? html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    if (!imageMatch?.[1]) throw new Error("We could not find a product image on that page. Upload the image instead.");
+    const imageUrl = new URL(imageMatch[1], pageUrl).toString();
+    const image = await fetch(imageUrl);
+    if (!image.ok) throw new Error("We could not download the product image from that page.");
+    const contentType = image.headers.get("content-type") ?? "image/jpeg";
+    if (!contentType.startsWith("image/")) throw new Error("The product page did not provide a usable image.");
+    const bytes = new Uint8Array(await image.arrayBuffer());
+    if (bytes.byteLength > 10 * 1024 * 1024) throw new Error("That product image is over 10MB. Upload a smaller image instead.");
+    return {
+      name: titleMatch?.[1]?.replace(/&amp;/g, "&").trim() || pageUrl.hostname,
+      imageUrl,
+      dataUrl: `data:${contentType};base64,${Buffer.from(bytes).toString("base64")}`,
+    };
+  });
+
 export const analyzeProductImage = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => analyzeInput.parse(data))
   .handler(async ({ data }): Promise<ProductAnalysis> => {
