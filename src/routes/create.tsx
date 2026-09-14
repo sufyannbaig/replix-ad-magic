@@ -1102,32 +1102,22 @@ function CreateAd() {
                     key={product.id}
                     disabled={preparing !== null}
                     onClick={() => void pickProduct(product.id)}
-                    className={cn(
-                      "overflow-hidden rounded-xl border border-border bg-card text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift",
-                      subject?.id === product.id && "ring-2 ring-primary",
-                    )}
+                    className={productCardClasses(subject?.id === product.id)}
                   >
-                    <div className="relative">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        loading="lazy"
-                        className="aspect-square w-full object-cover"
-                      />
-                      <Badge className="absolute top-3 left-3 bg-navy/85 text-[0.65rem] text-navy-foreground hover:bg-navy">
-                        #{product.rank} best seller
-                      </Badge>
-                      {preparing === product.id ? (
-                        <span className="absolute inset-0 flex items-center justify-center bg-navy/40">
-                          <Loader2 className="h-6 w-6 animate-spin text-navy-foreground" />
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="space-y-1 p-3.5">
-                      <p className="font-display text-sm font-semibold">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
-                      <p className="pt-1 text-[0.65rem] text-muted-foreground">{product.bestSellerNote}</p>
-                    </div>
+                    <ProductCardBody
+                      image={product.image}
+                      name={product.name}
+                      price={product.price}
+                      note={product.bestSellerNote}
+                      badge={`#${product.rank} Best Seller`}
+                      imageOverlay={
+                        preparing === product.id ? (
+                          <span className="absolute inset-0 flex items-center justify-center bg-navy/40">
+                            <Loader2 className="h-6 w-6 animate-spin text-navy-foreground" />
+                          </span>
+                        ) : null
+                      }
+                    />
                   </button>
                 ))}
               </div>
