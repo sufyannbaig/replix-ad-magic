@@ -1,8 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  Menu,
-  Sparkles,
-} from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
