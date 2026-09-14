@@ -26,8 +26,8 @@ export function ProductCardBody({
   imageOverlay,
 }: Omit<ProductCardProps, "selected" | "className">) {
   return (
-    <>
-      <div className="relative overflow-hidden bg-muted">
+    <div className="p-1.5">
+      <div className="relative overflow-hidden rounded-[14px] bg-muted">
         <img
           src={image}
           alt={name}
@@ -35,18 +35,18 @@ export function ProductCardBody({
           className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
         />
         {badge ? (
-          <span className="absolute left-3 top-3 rounded-full bg-navy px-3 py-1 text-[0.7rem] font-semibold text-navy-foreground">
+          <span className="absolute left-3 top-3 rounded-full bg-navy px-3.5 py-1.5 text-[0.72rem] font-semibold text-navy-foreground">
             {badge}
           </span>
         ) : null}
         {imageOverlay}
       </div>
-      <div className="border-t border-border/70 px-4 py-4">
-        <p className="text-base font-medium leading-snug text-foreground">{name}</p>
-        <p className="mt-1.5 text-base font-medium text-foreground">${price.toFixed(2)}</p>
-        {note ? <p className="mt-1.5 text-[0.8rem] text-muted-foreground">{note}</p> : null}
+      <div className="mt-1.5 rounded-[14px] bg-card px-4 py-4">
+        <p className="text-[0.95rem] font-semibold leading-snug text-foreground">{name}</p>
+        <p className="mt-1.5 text-[0.95rem] font-semibold text-foreground">${price.toFixed(2)}</p>
+        {note ? <p className="mt-1.5 text-[0.78rem] text-muted-foreground">{note}</p> : null}
       </div>
-    </>
+    </div>
   );
 }
 
