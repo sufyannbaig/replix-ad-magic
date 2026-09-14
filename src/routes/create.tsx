@@ -1297,7 +1297,7 @@ function CreateAd() {
                 size="lg"
                 variant="gradient"
                 className="rounded-full px-7"
-                disabled={generating || !analysis || themeIds.length === 0}
+                disabled={generating}
                 onClick={() => void runGeneration(batch)}
               >
                 <Sparkles className="mr-1 h-4 w-4" />
