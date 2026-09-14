@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
 import { AdCardSkeleton } from "@/components/AdCardSkeleton";
+import { ProductCardBody, productCardClasses } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
