@@ -80,17 +80,19 @@ export function AppShell({
   title,
   subtitle,
   action,
+  titleGradient = false,
   children,
 }: {
   title: string;
   subtitle?: string;
   action?: ReactNode;
+  titleGradient?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div className="dot-canvas min-h-screen w-full">
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex h-[76px] max-w-[1240px] items-center justify-between gap-5 px-5 sm:px-8 lg:h-[88px] lg:px-10">
           <Brand />
@@ -127,7 +129,16 @@ export function AppShell({
       <div className="mx-auto w-full max-w-[1104px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10">
         <div className={cn("flex items-start justify-between gap-4", title || subtitle ? "mb-7" : "mb-5")}>
           <div className="min-w-0 flex-1">
-              {title ? <h1 className="font-display text-2xl font-semibold text-foreground sm:text-3xl">{title}</h1> : null}
+              {title ? (
+                <h1
+                  className={cn(
+                    "font-display text-2xl font-semibold sm:text-3xl",
+                    titleGradient ? "brand-gradient-text" : "text-foreground",
+                  )}
+                >
+                  {title}
+                </h1>
+              ) : null}
               {subtitle ? (
                 <p className="mt-1 text-sm text-muted-foreground sm:text-base">{subtitle}</p>
               ) : null}

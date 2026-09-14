@@ -64,6 +64,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --color-brand-gradient-from: #375DAA;
+  --color-brand-gradient-via: #162544;
+  --color-brand-gradient-to: #375DAA;
+  --color-dot: #D9D9D9;
+
   --shadow-soft: 0 1px 2px oklch(0.256 0.055 265 / 0.04), 0 8px 24px oklch(0.256 0.055 265 / 0.06);
   --shadow-lift:
     0 2px 4px oklch(0.256 0.055 265 / 0.05), 0 18px 40px oklch(0.256 0.055 265 / 0.1);
@@ -72,7 +77,7 @@
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.977 0.008 95);
+  --background: #ffffff;
   --foreground: oklch(0.256 0.055 265);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.256 0.055 265);
@@ -163,4 +168,24 @@
   background-color: var(--color-card);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-soft);
+}
+
+/* White canvas with subtle #D9D9D9 dot grid */
+@utility dot-canvas {
+  background-color: #ffffff;
+  background-image: radial-gradient(#d9d9d9 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+  background-position: -11px -11px;
+}
+
+/* Brand gradient: #375DAA -> #162544 -> #375DAA */
+@utility brand-gradient {
+  background-image: linear-gradient(90deg, #375daa 0%, #162544 50%, #375daa 100%);
+}
+
+@utility brand-gradient-text {
+  background-image: linear-gradient(90deg, #375daa 0%, #162544 50%, #375daa 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
