@@ -104,7 +104,7 @@ export function AppShell({
           <div className="flex items-center gap-2">
             <Button asChild variant="gradient" className="hidden h-11 rounded-full px-7 sm:inline-flex">
               <Link to="/create">
-                <Sparkles className="h-4 w-4" /> Generate Ads
+                Generate Ads
               </Link>
             </Button>
             <Sheet open={open} onOpenChange={setOpen}>
@@ -119,7 +119,7 @@ export function AppShell({
                 </div>
                 <Button asChild className="mt-6 h-11 w-full rounded-full bg-navy text-navy-foreground hover:bg-navy-soft">
                   <Link to="/create" onClick={() => setOpen(false)}>
-                    <Sparkles className="h-4 w-4" /> Generate Ads
+                    Generate Ads
                   </Link>
                 </Button>
               </SheetContent>
