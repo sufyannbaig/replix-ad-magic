@@ -795,9 +795,7 @@ function ProductUrlPanel({
 
   return (
     <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-16 text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy text-gold">
-        <Link2 className="h-6 w-6" />
-      </span>
+      <img src={productUrlIcon.url} alt="Product URL" className="h-16 w-16 rounded-2xl object-contain" />
       <h3 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h3>
       <p className="mt-2 text-sm text-muted-foreground">
         Paste a public product page and we’ll use its primary image.
