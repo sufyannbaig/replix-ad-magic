@@ -28,6 +28,10 @@ type StudioState = {
   updateAd: (id: string, patch: Partial<Ad>) => void;
   toggleFavorite: (id: string) => void;
   addToCollection: (adId: string, collectionId: string) => void;
+  addCollection: (input: Omit<Collection, "id">) => string;
+  updateCollection: (id: string, patch: Partial<Omit<Collection, "id">>) => void;
+  removeCollection: (id: string) => void;
+  setCollectionAds: (collectionId: string, adIds: string[]) => void;
   spendCredits: (n: number) => void;
 };
 
@@ -42,6 +46,7 @@ globalScope.__replixStudioContext = StudioContext;
 
 export function StudioProvider({ children }: { children: ReactNode }) {
   const [ads, setAds] = useState<Ad[]>(seededAds);
+  const [collections, setCollections] = useState<Collection[]>(seedCollections);
   const [creditsUsed, setCreditsUsed] = useState(seedCredits.used);
 
   // Pull every real generated ad out of the database on first load.
@@ -101,6 +106,43 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const addCollection = useCallback((input: Omit<Collection, "id">) => {
+    const id = `collection-${Date.now().toString(36)}`;
+    setCollections((prev) => [...prev, { ...input, id }]);
+    return id;
+  }, []);
+
+  const updateCollection = useCallback((id: string, patch: Partial<Omit<Collection, "id">>) => {
+    setCollections((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }, []);
+
+  const removeCollection = useCallback((id: string) => {
+    setCollections((prev) => prev.filter((c) => c.id !== id));
+    setAds((prev) =>
+      prev.map((a) => {
+        if (!a.collectionIds.includes(id)) return a;
+        const collectionIds = a.collectionIds.filter((c) => c !== id);
+        void patchStoredAd(a.id, { collectionIds });
+        return { ...a, collectionIds };
+      }),
+    );
+  }, []);
+
+  const setCollectionAds = useCallback((collectionId: string, adIds: string[]) => {
+    setAds((prev) =>
+      prev.map((a) => {
+        const shouldHave = adIds.includes(a.id);
+        const has = a.collectionIds.includes(collectionId);
+        if (shouldHave === has) return a;
+        const collectionIds = shouldHave
+          ? [...a.collectionIds, collectionId]
+          : a.collectionIds.filter((c) => c !== collectionId);
+        void patchStoredAd(a.id, { collectionIds });
+        return { ...a, collectionIds };
+      }),
+    );
+  }, []);
+
   const spendCredits = useCallback(
     (n: number) => setCreditsUsed((prev) => Math.min(seedCredits.total, prev + n)),
     [],
@@ -109,7 +151,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const value = useMemo<StudioState>(
     () => ({
       ads,
-      collections: seedCollections,
+      collections,
       creditsUsed,
       creditsTotal: seedCredits.total,
       creditsRemaining: seedCredits.total - creditsUsed,
@@ -119,9 +161,28 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       updateAd,
       toggleFavorite,
       addToCollection,
+      addCollection,
+      updateCollection,
+      removeCollection,
+      setCollectionAds,
       spendCredits,
     }),
-    [ads, creditsUsed, addAds, replaceAd, removeAd, updateAd, toggleFavorite, addToCollection, spendCredits],
+    [
+      ads,
+      collections,
+      creditsUsed,
+      addAds,
+      replaceAd,
+      removeAd,
+      updateAd,
+      toggleFavorite,
+      addToCollection,
+      addCollection,
+      updateCollection,
+      removeCollection,
+      setCollectionAds,
+      spendCredits,
+    ],
   );
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
