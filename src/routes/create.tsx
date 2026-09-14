@@ -62,6 +62,7 @@ import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { takeProductIntake } from "@/lib/product-intake";
 import { cn } from "@/lib/utils";
+import productUrlIcon from "@/assets/product-url-icon.png.asset.json";
 import themeBeforeAfter from "@/assets/theme-before-after.jpg";
 import themeBoldClaim from "@/assets/theme-bold-claim.jpg";
 import themeFeatureBenefit from "@/assets/theme-feature-benefit.jpg";
