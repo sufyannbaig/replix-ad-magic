@@ -322,14 +322,19 @@ function ProductPanel({
       {subject.price !== undefined ? (
         <p className="text-xs text-muted-foreground">${subject.price.toFixed(2)}</p>
       ) : null}
-      <div className="mt-2 flex gap-2">
-        <Button size="sm" variant="outline" onClick={onChangeProduct}>
+      <div className="mt-3 flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-full border-navy px-4 text-navy hover:bg-navy hover:text-navy-foreground"
+          onClick={onChangeProduct}
+        >
           Change
         </Button>
         <Button
           size="sm"
-          variant="ghost"
-          className="text-destructive hover:text-destructive"
+          variant="outline"
+          className="rounded-full border-destructive px-4 text-destructive hover:bg-destructive hover:text-destructive-foreground"
           onClick={onDeleteProduct}
         >
           Delete
