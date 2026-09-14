@@ -756,8 +756,14 @@ function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
   );
 }
 
-function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
-  const [url, setUrl] = useState("");
+function ProductUrlPanel({
+  onReady,
+  initialUrl = "",
+}: {
+  onReady: (subject: Subject) => void;
+  initialUrl?: string;
+}) {
+  const [url, setUrl] = useState(initialUrl);
   const [busy, setBusy] = useState(false);
 
   const analyze = async () => {
@@ -768,11 +774,14 @@ function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
     setBusy(true);
     try {
       const resolved = await resolveProductUrl({ data: { url: url.trim() } });
+      // Re-encode to a compact JPEG so store formats the models reject (AVIF, huge
+      // PNGs) still work exactly like an upload.
+      const dataUrl = await urlToDataUrl(resolved.dataUrl);
       onReady({
         id: `url-${Date.now()}`,
         name: resolved.name,
-        displayImage: resolved.imageUrl,
-        dataUrl: resolved.dataUrl,
+        displayImage: dataUrl,
+        dataUrl,
         source: "url",
       });
     } catch (error) {
@@ -843,6 +852,7 @@ function CreateAd() {
   const [mode, setMode] = useState<"product" | "upload" | "url">(wizardCache.mode);
   const [subject, setSubject] = useState<Subject | null>(wizardCache.subject);
   const [preparing, setPreparing] = useState<string | null>(null);
+  const [intakeUrl, setIntakeUrl] = useState("");
   const [analysis, setAnalysis] = useState<ProductAnalysis | null>(wizardCache.analysis);
   const [themeIds, setThemeIds] = useState<ThemeId[]>(wizardCache.themeIds);
   const [format, setFormat] = useState<AdFormat>(wizardCache.format);
@@ -888,6 +898,7 @@ function CreateAd() {
       return;
     }
     setMode("url");
+    setIntakeUrl(intake.url);
   }, []);
 
   const pickProduct = async (id: string) => {
@@ -1158,7 +1169,7 @@ function CreateAd() {
             ) : mode === "upload" ? (
               <UploadPanel onReady={startUpload} />
             ) : (
-              <ProductUrlPanel onReady={startUpload} />
+              <ProductUrlPanel onReady={startUpload} initialUrl={intakeUrl} />
             )}
           </section>
         ) : null}

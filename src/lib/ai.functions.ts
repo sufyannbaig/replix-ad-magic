@@ -56,33 +56,153 @@ const analyzeInput = z.object({
   storeName: z.string().optional(),
 });
 
-const productUrlInput = z.object({ url: z.string().url() });
+const productUrlInput = z.object({ url: z.string().min(4) });
+
+function decodeEntities(value: string): string {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .trim();
+}
+
+/** Collect every plausible product-image candidate on the page, best first. */
+function imageCandidates(html: string): string[] {
+  const out: string[] = [];
+  const push = (value?: string | null) => {
+    if (!value) return;
+    const clean = decodeEntities(value).split(/\s+/)[0] ?? "";
+    if (!clean || clean.startsWith("data:")) return;
+    if (/\.svg($|\?)/i.test(clean)) return;
+    if (!out.includes(clean)) out.push(clean);
+  };
+
+  const metaProps = ["og:image:secure_url", "og:image", "twitter:image", "twitter:image:src"];
+  for (const prop of metaProps) {
+    const re = new RegExp(
+      `<meta[^>]+(?:property|name)=["']${prop}["'][^>]+content=["']([^"']+)["']`,
+      "gi",
+    );
+    for (const m of html.matchAll(re)) push(m[1]);
+    const reReversed = new RegExp(
+      `<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${prop}["']`,
+      "gi",
+    );
+    for (const m of html.matchAll(reReversed)) push(m[1]);
+  }
+
+  for (const m of html.matchAll(/<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/gi)) push(m[1]);
+
+  // JSON-LD product images.
+  for (const m of html.matchAll(
+    /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+  )) {
+    const block = m[1];
+    if (!block) continue;
+    for (const img of block.matchAll(/"(?:image|contentUrl|thumbnailUrl)"\s*:\s*"([^"]+)"/g)) push(img[1]);
+    for (const img of block.matchAll(/"(?:image|contentUrl)"\s*:\s*\[([^\]]+)\]/g)) {
+      for (const inner of (img[1] ?? "").matchAll(/"([^"]+)"/g)) push(inner[1]);
+    }
+  }
+
+  // Shopify/other CDN images inside markup, then any remaining <img>.
+  for (const m of html.matchAll(/https?:\/\/[^"'\s>]*cdn\.shopify\.com[^"'\s>]+\.(?:jpg|jpeg|png|webp)[^"'\s>]*/gi))
+    push(m[0]);
+  for (const m of html.matchAll(/<img[^>]+(?:data-src|data-srcset|srcset|src)=["']([^"']+)["']/gi)) push(m[1]);
+
+  return out;
+}
 
 export const resolveProductUrl = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => productUrlInput.parse(data))
   .handler(async ({ data }) => {
-    const pageUrl = new URL(data.url);
-    if (!/^https?:$/.test(pageUrl.protocol)) throw new Error("Enter a public http or https product URL.");
-    const page = await fetch(pageUrl, { headers: { "user-agent": "Mozilla/5.0 ReplixAI/1.0" } });
-    if (!page.ok) throw new Error("We could not open that product page.");
-    const html = await page.text();
-    const imageMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]+content=["']([^"']+)["']/i)
-      ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|twitter:image)["']/i);
-    const titleMatch = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)
-      ?? html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    if (!imageMatch?.[1]) throw new Error("We could not find a product image on that page. Upload the image instead.");
-    const imageUrl = new URL(imageMatch[1], pageUrl).toString();
-    const image = await fetch(imageUrl);
-    if (!image.ok) throw new Error("We could not download the product image from that page.");
-    const contentType = image.headers.get("content-type") ?? "image/jpeg";
-    if (!contentType.startsWith("image/")) throw new Error("The product page did not provide a usable image.");
-    const bytes = new Uint8Array(await image.arrayBuffer());
-    if (bytes.byteLength > 10 * 1024 * 1024) throw new Error("That product image is over 10MB. Upload a smaller image instead.");
-    return {
-      name: titleMatch?.[1]?.replace(/&amp;/g, "&").trim() || pageUrl.hostname,
-      imageUrl,
-      dataUrl: `data:${contentType};base64,${Buffer.from(bytes).toString("base64")}`,
+    const raw = data.url.trim();
+    let pageUrl: URL;
+    try {
+      pageUrl = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    } catch {
+      throw new Error("That does not look like a valid product URL.");
+    }
+    if (!/^https?:$/.test(pageUrl.protocol)) {
+      throw new Error("Enter a public http or https product URL.");
+    }
+
+    const browserHeaders = {
+      "user-agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+      "accept-language": "en-US,en;q=0.9",
     };
+
+    const page = await fetch(pageUrl, { headers: browserHeaders, redirect: "follow" }).catch(() => null);
+    if (!page || !page.ok) {
+      throw new Error(
+        "We could not open that product page. Check the link is public, or upload the image instead.",
+      );
+    }
+    const html = await page.text();
+    const finalUrl = new URL(page.url || pageUrl.toString());
+
+    const titleMatch =
+      html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) ??
+      html.match(/<title[^>]*>([^<]+)<\/title>/i);
+
+    const candidates = imageCandidates(html);
+    let lastReason = "";
+    // Logos and sprites are usually the first/smallest images on the page, so keep
+    // the heaviest usable candidate — that is nearly always the real product shot.
+    let best: { imageUrl: string; contentType: string; bytes: Uint8Array } | null = null;
+
+    for (const candidate of candidates.slice(0, 10)) {
+      let imageUrl: string;
+      try {
+        imageUrl = new URL(candidate.startsWith("//") ? `${finalUrl.protocol}${candidate}` : candidate, finalUrl).toString();
+      } catch {
+        continue;
+      }
+      if (/logo|sprite|icon|favicon|placeholder|badge|payment/i.test(imageUrl)) continue;
+      const image = await fetch(imageUrl, {
+        headers: { ...browserHeaders, referer: finalUrl.toString() },
+        redirect: "follow",
+      }).catch(() => null);
+      if (!image || !image.ok) {
+        lastReason = "download";
+        continue;
+      }
+      const contentType = (image.headers.get("content-type") ?? "image/jpeg").split(";")[0]!.trim();
+      if (!contentType.startsWith("image/")) {
+        lastReason = "type";
+        continue;
+      }
+      const bytes = new Uint8Array(await image.arrayBuffer());
+      if (bytes.byteLength > 10 * 1024 * 1024) {
+        lastReason = "size";
+        continue;
+      }
+      // Skip tiny sprites/tracking pixels that are not real product shots.
+      if (bytes.byteLength < 6 * 1024) {
+        lastReason = "tiny";
+        continue;
+      }
+      if (!best || bytes.byteLength > best.bytes.byteLength) best = { imageUrl, contentType, bytes };
+      if (best.bytes.byteLength > 250 * 1024) break;
+    }
+
+    if (best) {
+      return {
+        name: titleMatch?.[1] ? decodeEntities(titleMatch[1]) : finalUrl.hostname,
+        imageUrl: best.imageUrl,
+        dataUrl: `data:${best.contentType};base64,${Buffer.from(best.bytes).toString("base64")}`,
+      };
+    }
+
+    throw new Error(
+      lastReason === "size"
+        ? "The product image on that page is over 10MB. Upload a smaller image instead."
+        : "We could not find a usable product image on that page. Upload the image instead.",
+    );
   });
 
 export const analyzeProductImage = createServerFn({ method: "POST" })
