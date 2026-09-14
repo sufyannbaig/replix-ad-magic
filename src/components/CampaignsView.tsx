@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FolderOpen, Plus } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import emptyFolder from "@/assets/campaign-empty-folder.png.asset.json";
 import { CampaignDialog, type CampaignDialogMode } from "@/components/CampaignDialog";
 import { CampaignFolderCard } from "@/components/CampaignFolderCard";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import { useStudio } from "@/lib/studio-store";
 
 export function CampaignsView({ openSignal = 0 }: { openSignal?: number }) {
   const { collections, ads, removeCollection } = useStudio();
+  const navigate = useNavigate();
   const [dialog, setDialog] = useState<{ mode: CampaignDialogMode; collection?: Collection } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Collection | null>(null);
   const [lastSignal, setLastSignal] = useState(openSignal);
@@ -68,14 +70,12 @@ export function CampaignsView({ openSignal = 0 }: { openSignal?: number }) {
   if (!populated.length)
     return (
       <>
-        <div className="mx-auto flex max-w-3xl flex-col items-center rounded-3xl border border-border bg-card px-8 py-16 text-center">
-          <span className="flex h-20 w-20 items-center justify-center rounded-2xl bg-success-soft">
-            <FolderOpen className="h-9 w-9 text-success" />
-          </span>
-          <h2 className="mt-7 font-display text-2xl font-semibold">No Campaigns Yet</h2>
+        <div className="mx-auto flex max-w-3xl flex-col items-center rounded-3xl bg-card px-8 py-14 text-center shadow-soft">
+          <img src={emptyFolder.url} alt="" className="h-[200px] w-auto" />
+          <h2 className="mt-6 font-display text-2xl font-semibold">No Campaigns Yet</h2>
           <p className="mt-2 text-muted-foreground">Group related ads together to keep your gallery tidy.</p>
-          <Button variant="navy" className="mt-8 rounded-full px-7" onClick={() => setDialog({ mode: "create" })}>
-            <Plus /> Create Your First Campaign
+          <Button variant="navy" className="mt-7 rounded-full px-8 py-6 text-base" onClick={() => setDialog({ mode: "create" })}>
+            Create Your First Campaign
           </Button>
         </div>
         {dialogNode}
@@ -92,6 +92,7 @@ export function CampaignsView({ openSignal = 0 }: { openSignal?: number }) {
             count={collection.ads.length}
             images={collection.ads.map((ad) => ad.image).filter(Boolean)}
             color={collection.color}
+            onOpen={() => navigate({ to: "/campaigns/$campaignId", params: { campaignId: collection.id } })}
             onAdd={() => setDialog({ mode: "ads", collection })}
             onEdit={() => setDialog({ mode: "edit", collection })}
             onDelete={() => setPendingDelete(collection)}

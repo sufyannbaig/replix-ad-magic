@@ -12,12 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as BillingRouteImport } from './routes/billing'
-import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as CampaignsIndexRouteImport } from './routes/campaigns.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,11 +32,6 @@ const AnalyticsRoute = AnalyticsRouteImport.update({
 const BillingRoute = BillingRouteImport.update({
   id: '/billing',
   path: '/billing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CampaignsRoute = CampaignsRouteImport.update({
-  id: '/campaigns',
-  path: '/campaigns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CollectionsRoute = CollectionsRouteImport.update({
@@ -64,40 +59,45 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampaignsIndexRoute = CampaignsIndexRouteImport.update({
+  id: '/campaigns/',
+  path: '/campaigns/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/billing': typeof BillingRoute
-  '/campaigns': typeof CampaignsRoute
   '/collections': typeof CollectionsRoute
   '/create': typeof CreateRoute
   '/gallery': typeof GalleryRoute
   '/help': typeof HelpRoute
   '/pricing': typeof PricingRoute
+  '/campaigns/': typeof CampaignsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/billing': typeof BillingRoute
-  '/campaigns': typeof CampaignsRoute
   '/collections': typeof CollectionsRoute
   '/create': typeof CreateRoute
   '/gallery': typeof GalleryRoute
   '/help': typeof HelpRoute
   '/pricing': typeof PricingRoute
+  '/campaigns': typeof CampaignsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/billing': typeof BillingRoute
-  '/campaigns': typeof CampaignsRoute
   '/collections': typeof CollectionsRoute
   '/create': typeof CreateRoute
   '/gallery': typeof GalleryRoute
   '/help': typeof HelpRoute
   '/pricing': typeof PricingRoute
+  '/campaigns/': typeof CampaignsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,46 +105,46 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/billing'
-    | '/campaigns'
     | '/collections'
     | '/create'
     | '/gallery'
     | '/help'
     | '/pricing'
+    | '/campaigns/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analytics'
     | '/billing'
-    | '/campaigns'
     | '/collections'
     | '/create'
     | '/gallery'
     | '/help'
     | '/pricing'
+    | '/campaigns'
   id:
     | '__root__'
     | '/'
     | '/analytics'
     | '/billing'
-    | '/campaigns'
     | '/collections'
     | '/create'
     | '/gallery'
     | '/help'
     | '/pricing'
+    | '/campaigns/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   BillingRoute: typeof BillingRoute
-  CampaignsRoute: typeof CampaignsRoute
   CollectionsRoute: typeof CollectionsRoute
   CreateRoute: typeof CreateRoute
   GalleryRoute: typeof GalleryRoute
   HelpRoute: typeof HelpRoute
   PricingRoute: typeof PricingRoute
+  CampaignsIndexRoute: typeof CampaignsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -168,13 +168,6 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/billing'
       preLoaderRoute: typeof BillingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/campaigns': {
-      id: '/campaigns'
-      path: '/campaigns'
-      fullPath: '/campaigns'
-      preLoaderRoute: typeof CampaignsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/collections': {
@@ -212,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaigns/': {
+      id: '/campaigns/'
+      path: '/campaigns'
+      fullPath: '/campaigns/'
+      preLoaderRoute: typeof CampaignsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -219,12 +219,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   BillingRoute: BillingRoute,
-  CampaignsRoute: CampaignsRoute,
   CollectionsRoute: CollectionsRoute,
   CreateRoute: CreateRoute,
   GalleryRoute: GalleryRoute,
   HelpRoute: HelpRoute,
   PricingRoute: PricingRoute,
+  CampaignsIndexRoute: CampaignsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

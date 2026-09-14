@@ -22,6 +22,7 @@ export function CampaignFolderCard({
   onEdit,
   onAdd,
   onDelete,
+  onOpen,
 }: {
   title: string;
   count: number;
@@ -31,12 +32,29 @@ export function CampaignFolderCard({
   onEdit?: () => void;
   onAdd?: () => void;
   onDelete?: () => void;
+  onOpen?: () => void;
 }) {
   const front = images[0];
   const back = images[1] ?? front;
 
   return (
-    <article className={cn("group relative aspect-[294/271] w-full", className)}>
+    <article
+      className={cn("group relative aspect-[294/271] w-full", onOpen && "cursor-pointer", className)}
+      {...(onOpen
+        ? {
+            role: "button" as const,
+            tabIndex: 0,
+            "aria-label": `Open ${title}`,
+            onClick: onOpen,
+            onKeyDown: (event: React.KeyboardEvent) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onOpen();
+              }
+            },
+          }
+        : {})}
+    >
       <img src={folderByColor[color]} alt="" className="absolute inset-0 h-full w-full" />
       {back ? (
         <div className="absolute top-[48%] left-[49.7%] h-[31.4%] w-[45.2%] overflow-hidden rounded-xl">
