@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
 import creditCoin from "@/assets/redesign/credit-coin.png";
+import replixLogo from "@/assets/replix-logo.png.asset.json";
 
 type NavItem = { to: "/" | "/gallery" | "/campaigns" | "/analytics" | "/pricing" | "/help"; label: string };
 
@@ -23,11 +24,8 @@ const navItems: NavItem[] = [
 
 function Brand({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center gap-3" aria-label="Replix AI dashboard">
-      <span className="flex h-10 w-10 items-center justify-center bg-navy font-display text-xl font-bold text-gold">
-        R
-      </span>
-      <span className="font-display text-base font-bold tracking-[0.2em] text-navy">REPLIX AI</span>
+    <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center" aria-label="Replix AI dashboard">
+      <img src={replixLogo.url} alt="Replix AI" className="h-10 w-auto" />
     </Link>
   );
 }
