@@ -86,11 +86,13 @@ function Dashboard() {
               </span>
               <img src={replixMark.url} alt="Replix AI" className="h-16 w-16 rotate-6 rounded-2xl shadow-lift sm:h-20 sm:w-20" />
             </div>
+            <div className="relative">
               <h2 className="mt-5 text-2xl font-medium sm:text-3xl">
                 Connect Your <span className="font-bold italic">Shopify</span> Store
               </h2>
               <p className="mx-auto mt-3 max-w-md text-sm text-navy-foreground/85">Sync your Shopify catalog and create studio-quality ads with optimized copy in under 60 seconds.</p>
               <Button className="mt-6 rounded-full bg-card px-6 text-navy hover:bg-card/90" onClick={() => setConnected(true)}><Link2 /> Connect Store</Button>
+            </div>
           </section>
         )}
 
