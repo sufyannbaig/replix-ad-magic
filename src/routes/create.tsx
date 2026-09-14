@@ -1338,47 +1338,8 @@ function RecentGenerations() {
           aria-label="Recent ad generations"
         >
           {recent.map((ad) => (
-            <div
-              key={ad.id}
-              role="listitem"
-              className="group card-soft relative w-44 shrink-0 overflow-hidden"
-            >
-              <img
-                src={ad.image}
-                alt={ad.headline}
-                loading="lazy"
-                className="aspect-square w-full object-cover"
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-navy/70 opacity-0 transition-opacity group-hover:opacity-100">
-                <div className="flex gap-2">
-                  <button
-                    aria-label="Edit copy"
-                    onClick={() => startEdit(ad)}
-                    className="rounded-full bg-card/90 p-2 text-navy transition-colors hover:bg-card"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    aria-label="Download"
-                    onClick={() =>
-                      void downloadImage(
-                        ad.image,
-                        `${ad.productName.replace(/\s+/g, "-").toLowerCase()}-ad.png`,
-                      ).catch(() => toast.error("Could not download that image."))
-                    }
-                    className="rounded-full bg-card/90 p-2 text-navy transition-colors hover:bg-card"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <Button size="sm" onClick={() => void share(ad)}>
-                  <Share2 className="mr-1 h-3.5 w-3.5" /> Share
-                </Button>
-              </div>
-              <div className="p-3">
-                <p className="truncate text-xs font-semibold">{ad.headline}</p>
-                <p className="truncate text-[0.7rem] text-muted-foreground">{ad.productName}</p>
-              </div>
+            <div key={ad.id} role="listitem" className="w-[300px] shrink-0">
+              <AdCard ad={ad} />
             </div>
           ))}
         </div>
