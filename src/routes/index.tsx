@@ -60,13 +60,14 @@ function Dashboard() {
             </div>
             <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
               {products.map((product) => (
-                <Link key={product.id} to="/create" className="group overflow-hidden rounded-xl border border-border bg-card shadow-soft">
-                  <div className="relative"><img src={product.image} alt={product.name} className="aspect-square w-full object-cover transition-transform group-hover:scale-[1.02]" /><span className="absolute left-3 top-3 rounded-full bg-navy px-2.5 py-1 text-[0.65rem] font-semibold text-navy-foreground">#{product.rank} Best Seller</span></div>
-                  <div className="p-3.5">
-                    <p className="font-display text-sm font-semibold">{product.name}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
-                    <p className="mt-2 text-[0.65rem] text-muted-foreground">{product.bestSellerNote}</p>
-                  </div>
+                <Link key={product.id} to="/create" className={productCardClasses()}>
+                  <ProductCardBody
+                    image={product.image}
+                    name={product.name}
+                    price={product.price}
+                    note={product.bestSellerNote}
+                    badge={`#${product.rank} Best Seller`}
+                  />
                 </Link>
               ))}
             </div>
