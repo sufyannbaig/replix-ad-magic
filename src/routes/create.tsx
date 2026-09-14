@@ -1293,31 +1293,12 @@ function CreateAd() {
 /* ---------- Recent Ads Generations: real past results, horizontally scrolled ---------- */
 
 function RecentGenerations() {
-  const { ads, updateAd } = useStudio();
+  const { ads } = useStudio();
   const scroller = useRef<HTMLDivElement | null>(null);
-  const [editing, setEditing] = useState<Ad | null>(null);
-  const [headline, setHeadline] = useState("");
-  const [caption, setCaption] = useState("");
-  const [cta, setCta] = useState("");
 
   const recent = ads.filter((a) => a.image).slice(0, 12);
   if (!recent.length) return null;
 
-  const startEdit = (ad: Ad) => {
-    setHeadline(ad.headline);
-    setCaption(ad.caption);
-    setCta(ad.cta);
-    setEditing(ad);
-  };
-
-  const share = async (ad: Ad) => {
-    try {
-      await navigator.clipboard.writeText(`${ad.headline}\n\n${ad.caption}\n\n${ad.image}`);
-      toast.success("Ad copy and link copied — ready to share.");
-    } catch {
-      toast.error("Could not copy that ad.");
-    }
-  };
 
   return (
     <section className="space-y-4 pt-2">
@@ -1355,33 +1336,6 @@ function RecentGenerations() {
         </button>
       </div>
 
-      <Dialog open={editing !== null} onOpenChange={(v) => !v && setEditing(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display">Edit ad copy</DialogTitle>
-            <DialogDescription>Rewrite the hook, caption or button text.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input value={headline} onChange={(e) => setHeadline(e.target.value)} />
-            <Textarea value={caption} rows={4} onChange={(e) => setCaption(e.target.value)} />
-            <Input value={cta} onChange={(e) => setCta(e.target.value)} />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setEditing(null)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (editing) updateAd(editing.id, { headline, caption, cta });
-                setEditing(null);
-                toast.success("Copy updated");
-              }}
-            >
-              Save copy
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }
