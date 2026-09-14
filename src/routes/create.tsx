@@ -52,7 +52,13 @@ import {
   type Platform,
   type ThemeId,
 } from "@/data/studio";
-import { analyzeProductImage, generateAdCopy, renderAdImage, resolveProductUrl, type ProductAnalysis } from "@/lib/ai.functions";
+import {
+  analyzeProductImage,
+  generateAdCopy,
+  renderAdImage,
+  resolveProductUrl,
+  type ProductAnalysis,
+} from "@/lib/ai.functions";
 import { saveAd } from "@/lib/ads-repo";
 import { downloadImage, fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
@@ -157,7 +163,6 @@ function StepRail({ step }: { step: number }) {
     </div>
   );
 }
-
 
 /** One labelled, inline-editable field of the product summary card. */
 function SummaryField({
@@ -467,7 +472,6 @@ function ProductPanel({
   );
 }
 
-
 /* ---------- Step 4: real generation progress ---------- */
 
 function GenerationProgress({
@@ -522,7 +526,6 @@ function GenerationProgress({
     </div>
   );
 }
-
 
 /* ---------- Step 3: one unified creative-theme picker ---------- */
 
@@ -598,7 +601,6 @@ function ThemePicker({
         </div>
       </div>
 
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
@@ -636,7 +638,11 @@ function ThemePicker({
                           : "bg-card/90 text-muted-foreground",
                       )}
                     >
-                      {selected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                      {selected ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Plus className="h-3.5 w-3.5" />
+                      )}
                     </span>
                   </div>
                   <div className="p-3">
@@ -772,7 +778,9 @@ function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
         source: "url",
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "We could not analyze that product URL.");
+      toast.error(
+        error instanceof Error ? error.message : "We could not analyze that product URL.",
+      );
     } finally {
       setBusy(false);
     }
@@ -780,12 +788,23 @@ function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
 
   return (
     <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-16 text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy text-gold"><Link2 className="h-6 w-6" /></span>
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy text-gold">
+        <Link2 className="h-6 w-6" />
+      </span>
       <h3 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h3>
-      <p className="mt-2 text-sm text-muted-foreground">Paste a public product page and we’ll use its primary image.</p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Paste a public product page and we’ll use its primary image.
+      </p>
       <div className="mt-6 flex w-full max-w-lg rounded-full border border-input bg-background p-1.5 pl-4">
-        <Input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://yourstore.com/products/..." className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none" />
-        <Button className="rounded-full" disabled={busy} onClick={() => void analyze()}>{busy ? <Loader2 className="animate-spin" /> : <Sparkles />} Analyze</Button>
+        <Input
+          value={url}
+          onChange={(event) => setUrl(event.target.value)}
+          placeholder="https://yourstore.com/products/..."
+          className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none"
+        />
+        <Button className="rounded-full" disabled={busy} onClick={() => void analyze()}>
+          {busy ? <Loader2 className="animate-spin" /> : <Sparkles />} Analyze
+        </Button>
       </div>
     </div>
   );
@@ -861,13 +880,17 @@ function CreateAd() {
     const intake = takeProductIntake();
     if (!intake) return;
     if (intake.kind === "upload") {
-      startUpload({ id: `upload-${Date.now()}`, name: intake.name || "Your product", displayImage: intake.dataUrl, dataUrl: intake.dataUrl, source: "upload" });
+      startUpload({
+        id: `upload-${Date.now()}`,
+        name: intake.name || "Your product",
+        displayImage: intake.dataUrl,
+        dataUrl: intake.dataUrl,
+        source: "upload",
+      });
       return;
     }
     setMode("url");
   }, []);
-
-
 
   const pickProduct = async (id: string) => {
     const product = products.find((p) => p.id === id);
@@ -949,7 +972,6 @@ function CreateAd() {
     }
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
 
-
     setGenerating(true);
     setGenError(null);
     setCopyDone(false);
@@ -1001,9 +1023,7 @@ function CreateAd() {
       setGenerating(false);
 
       await Promise.all(
-        drafts.map((draft, i) =>
-          renderAndSave(draft, concepts[i]!.imageBrief, subject.dataUrl),
-        ),
+        drafts.map((draft, i) => renderAndSave(draft, concepts[i]!.imageBrief, subject.dataUrl)),
       );
     } catch (err) {
       setGenError(err instanceof Error ? err.message : "Generation failed.");
@@ -1163,7 +1183,11 @@ function CreateAd() {
                 />
               </div>
 
-              <div className="hidden items-center justify-center pt-16 lg:flex"><span className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card shadow-soft"><Plus className="h-5 w-5 text-navy" /></span></div>
+              <div className="hidden items-center justify-center pt-16 lg:flex">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card shadow-soft">
+                  <Plus className="h-5 w-5 text-navy" />
+                </span>
+              </div>
 
               <div className="space-y-3">
                 <div className="flex items-baseline justify-between">
@@ -1299,7 +1323,6 @@ function RecentGenerations() {
   const recent = ads.filter((a) => a.image).slice(0, 12);
   if (!recent.length) return null;
 
-
   return (
     <section className="space-y-4 pt-2">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -1335,8 +1358,6 @@ function RecentGenerations() {
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
-
     </section>
   );
 }
-
