@@ -756,8 +756,14 @@ function UploadPanel({ onReady }: { onReady: (subject: Subject) => void }) {
   );
 }
 
-function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
-  const [url, setUrl] = useState("");
+function ProductUrlPanel({
+  onReady,
+  initialUrl = "",
+}: {
+  onReady: (subject: Subject) => void;
+  initialUrl?: string;
+}) {
+  const [url, setUrl] = useState(initialUrl);
   const [busy, setBusy] = useState(false);
 
   const analyze = async () => {
