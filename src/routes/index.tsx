@@ -100,7 +100,7 @@ function Dashboard() {
             <Button variant="outline" className="mt-6 rounded-full px-6" onClick={() => inputRef.current?.click()}><Upload /> Upload Image</Button>
           </div>
           <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-10 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy"><Link2 className="h-6 w-6 text-gold" /></span>
+            <img src={replixMark.url} alt="Replix" className="h-16 w-16 rounded-2xl object-contain" />
             <h2 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h2>
             <div className="mt-6 flex w-full max-w-md rounded-full border border-input bg-background p-1.5 pl-4">
               <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourstore.com/products/..." className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none" />
