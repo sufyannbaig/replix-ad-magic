@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
 import creditCoin from "@/assets/redesign/credit-coin.png";
+import replixLogo from "@/assets/replix-logo.png.asset.json";
 
 type NavItem = { to: "/" | "/gallery" | "/campaigns" | "/analytics" | "/pricing" | "/help"; label: string };
 
