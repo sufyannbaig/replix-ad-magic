@@ -12,7 +12,6 @@ import {
   Lightbulb,
   Plus,
   Upload,
-  Store,
   AlertTriangle,
   ImagePlus,
   Pencil,
