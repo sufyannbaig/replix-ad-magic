@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { ArrowRight, Copy, Link2, Store, Upload } from "lucide-react";
+import { ArrowRight, Copy, Link2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { AdCard } from "@/components/AdCard";
