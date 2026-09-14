@@ -5,9 +5,7 @@ import {
   ArrowRight,
   Check,
   ChevronRight,
-  Download,
   Loader2,
-  Share2,
   Sparkles,
   Lightbulb,
   Plus,
@@ -52,9 +50,15 @@ import {
   type Platform,
   type ThemeId,
 } from "@/data/studio";
-import { analyzeProductImage, generateAdCopy, renderAdImage, resolveProductUrl, type ProductAnalysis } from "@/lib/ai.functions";
+import {
+  analyzeProductImage,
+  generateAdCopy,
+  renderAdImage,
+  resolveProductUrl,
+  type ProductAnalysis,
+} from "@/lib/ai.functions";
 import { saveAd } from "@/lib/ads-repo";
-import { downloadImage, fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
+import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { takeProductIntake } from "@/lib/product-intake";
 import { cn } from "@/lib/utils";
@@ -157,7 +161,6 @@ function StepRail({ step }: { step: number }) {
     </div>
   );
 }
-
 
 /** One labelled, inline-editable field of the product summary card. */
 function SummaryField({
@@ -322,14 +325,19 @@ function ProductPanel({
       {subject.price !== undefined ? (
         <p className="text-xs text-muted-foreground">${subject.price.toFixed(2)}</p>
       ) : null}
-      <div className="mt-2 flex gap-2">
-        <Button size="sm" variant="outline" onClick={onChangeProduct}>
+      <div className="mt-3 flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-full border-navy px-4 text-navy hover:bg-navy hover:text-navy-foreground"
+          onClick={onChangeProduct}
+        >
           Change
         </Button>
         <Button
           size="sm"
-          variant="ghost"
-          className="text-destructive hover:text-destructive"
+          variant="outline"
+          className="rounded-full border-destructive bg-card px-4 text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={onDeleteProduct}
         >
           Delete
@@ -339,8 +347,8 @@ function ProductPanel({
   );
 
   return (
-    <div className="rounded-2xl bg-muted/60 p-5">
-      <div className="card-soft p-5">
+    <div className="card-soft p-5">
+      <div>
         <div className="flex flex-col gap-6 sm:flex-row">
           {thumb}
 
@@ -462,7 +470,6 @@ function ProductPanel({
   );
 }
 
-
 /* ---------- Step 4: real generation progress ---------- */
 
 function GenerationProgress({
@@ -518,7 +525,6 @@ function GenerationProgress({
   );
 }
 
-
 /* ---------- Step 3: one unified creative-theme picker ---------- */
 
 function ThemePicker({
@@ -535,8 +541,8 @@ function ThemePicker({
   const preview = chosen.length ? chosen : themes.slice(0, 3);
 
   return (
-    <div className="rounded-2xl bg-muted/60 p-5">
-      <div className="card-soft flex flex-col items-center gap-4 p-5 text-center">
+    <div>
+      <div className="card-soft flex flex-col items-center gap-4 p-6 text-center">
         <div className="flex h-28 items-center justify-center pt-2">
           {preview.map((t, i) => (
             <img
@@ -557,9 +563,7 @@ function ThemePicker({
           ))}
         </div>
 
-        <p className="text-sm font-semibold text-navy underline decoration-navy/40 underline-offset-4">
-          Select Creative Theme
-        </p>
+        <p className="text-base font-semibold text-foreground">Select Creative Theme</p>
 
         {chosen.length ? (
           <div className="flex flex-wrap justify-center gap-2">
@@ -582,10 +586,10 @@ function ThemePicker({
 
         <div className="flex w-full flex-col gap-2">
           <Button
-            className="w-full bg-navy text-navy-foreground hover:bg-navy-soft"
+            className="w-full rounded-full bg-navy text-navy-foreground hover:bg-navy-soft"
             onClick={() => setOpen(true)}
           >
-            <LayoutGrid className="mr-1 h-4 w-4" /> Select Theme
+            <LayoutGrid className="mr-1 h-4 w-4" /> Select Creative Theme
           </Button>
           {chosen.length ? (
             <Button variant="ghost" size="sm" onClick={onClear}>
@@ -594,7 +598,6 @@ function ThemePicker({
           ) : null}
         </div>
       </div>
-
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
@@ -633,7 +636,11 @@ function ThemePicker({
                           : "bg-card/90 text-muted-foreground",
                       )}
                     >
-                      {selected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                      {selected ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Plus className="h-3.5 w-3.5" />
+                      )}
                     </span>
                   </div>
                   <div className="p-3">
@@ -769,7 +776,9 @@ function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
         source: "url",
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "We could not analyze that product URL.");
+      toast.error(
+        error instanceof Error ? error.message : "We could not analyze that product URL.",
+      );
     } finally {
       setBusy(false);
     }
@@ -777,12 +786,23 @@ function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
 
   return (
     <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-16 text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy text-gold"><Link2 className="h-6 w-6" /></span>
+      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy text-gold">
+        <Link2 className="h-6 w-6" />
+      </span>
       <h3 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h3>
-      <p className="mt-2 text-sm text-muted-foreground">Paste a public product page and we’ll use its primary image.</p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Paste a public product page and we’ll use its primary image.
+      </p>
       <div className="mt-6 flex w-full max-w-lg rounded-full border border-input bg-background p-1.5 pl-4">
-        <Input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://yourstore.com/products/..." className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none" />
-        <Button className="rounded-full" disabled={busy} onClick={() => void analyze()}>{busy ? <Loader2 className="animate-spin" /> : <Sparkles />} Analyze</Button>
+        <Input
+          value={url}
+          onChange={(event) => setUrl(event.target.value)}
+          placeholder="https://yourstore.com/products/..."
+          className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none"
+        />
+        <Button className="rounded-full" disabled={busy} onClick={() => void analyze()}>
+          {busy ? <Loader2 className="animate-spin" /> : <Sparkles />} Analyze
+        </Button>
       </div>
     </div>
   );
@@ -858,13 +878,17 @@ function CreateAd() {
     const intake = takeProductIntake();
     if (!intake) return;
     if (intake.kind === "upload") {
-      startUpload({ id: `upload-${Date.now()}`, name: intake.name || "Your product", displayImage: intake.dataUrl, dataUrl: intake.dataUrl, source: "upload" });
+      startUpload({
+        id: `upload-${Date.now()}`,
+        name: intake.name || "Your product",
+        displayImage: intake.dataUrl,
+        dataUrl: intake.dataUrl,
+        source: "upload",
+      });
       return;
     }
     setMode("url");
   }, []);
-
-
 
   const pickProduct = async (id: string) => {
     const product = products.find((p) => p.id === id);
@@ -946,7 +970,6 @@ function CreateAd() {
     }
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
 
-
     setGenerating(true);
     setGenError(null);
     setCopyDone(false);
@@ -998,9 +1021,7 @@ function CreateAd() {
       setGenerating(false);
 
       await Promise.all(
-        drafts.map((draft, i) =>
-          renderAndSave(draft, concepts[i]!.imageBrief, subject.dataUrl),
-        ),
+        drafts.map((draft, i) => renderAndSave(draft, concepts[i]!.imageBrief, subject.dataUrl)),
       );
     } catch (err) {
       setGenError(err instanceof Error ? err.message : "Generation failed.");
@@ -1144,16 +1165,9 @@ function CreateAd() {
 
         {step === 2 && subject ? (
           <section className="space-y-6">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Select a product from your store inventory to begin.
-              </p>
-              <h2 className="font-display text-2xl font-semibold">Create a new ad</h2>
-            </div>
-
             <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_auto_minmax(280px,1fr)]">
               <div className="space-y-3">
-                <h3 className="font-display text-lg font-semibold">Product</h3>
+                <h3 className="text-xl font-medium text-foreground">Product</h3>
                 <ProductPanel
                   subject={subject}
                   analysis={analysis}
@@ -1167,11 +1181,15 @@ function CreateAd() {
                 />
               </div>
 
-              <div className="hidden items-center justify-center pt-16 lg:flex"><span className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card shadow-soft"><Plus className="h-5 w-5 text-navy" /></span></div>
+              <div className="hidden items-center justify-center pt-16 lg:flex">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card shadow-soft">
+                  <Plus className="h-5 w-5 text-navy" />
+                </span>
+              </div>
 
               <div className="space-y-3">
                 <div className="flex items-baseline justify-between">
-                  <h3 className="font-display text-lg font-semibold">Creative Themes</h3>
+                  <h3 className="text-xl font-medium text-foreground">Creative Themes</h3>
                   <span className="text-xs text-muted-foreground">
                     {themeIds.length} of 3 chosen
                   </span>
@@ -1188,9 +1206,7 @@ function CreateAd() {
             <div className="card-soft flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                    Format
-                  </span>
+                  <span className="text-sm font-medium text-foreground">Format:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {formats.map((f) => (
                       <button
@@ -1210,9 +1226,7 @@ function CreateAd() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                    Concepts
-                  </span>
+                  <span className="text-sm font-medium text-foreground">Concepts:</span>
                   <div className="flex gap-1.5">
                     {[3, 5, 10].map((n) => (
                       <button
@@ -1234,12 +1248,13 @@ function CreateAd() {
 
               <Button
                 size="lg"
-                className="bg-navy text-navy-foreground hover:bg-navy-soft"
+                variant="gradient"
+                className="rounded-full px-7"
                 disabled={generating || !analysis || themeIds.length === 0}
                 onClick={() => void runGeneration(batch)}
               >
                 <Sparkles className="mr-1 h-4 w-4" />
-                {generating ? "Generating…" : "Generate Ad"}
+                {generating ? "Generating…" : "Generate Ads"}
               </Button>
             </div>
 
@@ -1300,42 +1315,19 @@ function CreateAd() {
 /* ---------- Recent Ads Generations: real past results, horizontally scrolled ---------- */
 
 function RecentGenerations() {
-  const { ads, updateAd } = useStudio();
+  const { ads } = useStudio();
   const scroller = useRef<HTMLDivElement | null>(null);
-  const [editing, setEditing] = useState<Ad | null>(null);
-  const [headline, setHeadline] = useState("");
-  const [caption, setCaption] = useState("");
-  const [cta, setCta] = useState("");
 
   const recent = ads.filter((a) => a.image).slice(0, 12);
   if (!recent.length) return null;
-
-  const startEdit = (ad: Ad) => {
-    setHeadline(ad.headline);
-    setCaption(ad.caption);
-    setCta(ad.cta);
-    setEditing(ad);
-  };
-
-  const share = async (ad: Ad) => {
-    try {
-      await navigator.clipboard.writeText(`${ad.headline}\n\n${ad.caption}\n\n${ad.image}`);
-      toast.success("Ad copy and link copied — ready to share.");
-    } catch {
-      toast.error("Could not copy that ad.");
-    }
-  };
 
   return (
     <section className="space-y-4 pt-2">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 className="font-display text-xl font-semibold">Recent Ads Generations</h3>
-          <p className="text-sm text-muted-foreground">
-            The most recent results generated through the app.
-          </p>
+          <h3 className="text-xl font-medium text-foreground">Recent Generated Ads</h3>
         </div>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" className="rounded-full px-5" asChild>
           <Link to="/gallery">View All</Link>
         </Button>
       </div>
@@ -1348,47 +1340,8 @@ function RecentGenerations() {
           aria-label="Recent ad generations"
         >
           {recent.map((ad) => (
-            <div
-              key={ad.id}
-              role="listitem"
-              className="group card-soft relative w-44 shrink-0 overflow-hidden"
-            >
-              <img
-                src={ad.image}
-                alt={ad.headline}
-                loading="lazy"
-                className="aspect-square w-full object-cover"
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-navy/70 opacity-0 transition-opacity group-hover:opacity-100">
-                <div className="flex gap-2">
-                  <button
-                    aria-label="Edit copy"
-                    onClick={() => startEdit(ad)}
-                    className="rounded-full bg-card/90 p-2 text-navy transition-colors hover:bg-card"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    aria-label="Download"
-                    onClick={() =>
-                      void downloadImage(
-                        ad.image,
-                        `${ad.productName.replace(/\s+/g, "-").toLowerCase()}-ad.png`,
-                      ).catch(() => toast.error("Could not download that image."))
-                    }
-                    className="rounded-full bg-card/90 p-2 text-navy transition-colors hover:bg-card"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <Button size="sm" onClick={() => void share(ad)}>
-                  <Share2 className="mr-1 h-3.5 w-3.5" /> Share
-                </Button>
-              </div>
-              <div className="p-3">
-                <p className="truncate text-xs font-semibold">{ad.headline}</p>
-                <p className="truncate text-[0.7rem] text-muted-foreground">{ad.productName}</p>
-              </div>
+            <div key={ad.id} role="listitem" className="w-[300px] shrink-0">
+              <AdCard ad={ad} />
             </div>
           ))}
         </div>
@@ -1403,35 +1356,6 @@ function RecentGenerations() {
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
-
-      <Dialog open={editing !== null} onOpenChange={(v) => !v && setEditing(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display">Edit ad copy</DialogTitle>
-            <DialogDescription>Rewrite the hook, caption or button text.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input value={headline} onChange={(e) => setHeadline(e.target.value)} />
-            <Textarea value={caption} rows={4} onChange={(e) => setCaption(e.target.value)} />
-            <Input value={cta} onChange={(e) => setCta(e.target.value)} />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setEditing(null)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (editing) updateAd(editing.id, { headline, caption, cta });
-                setEditing(null);
-                toast.success("Copy updated");
-              }}
-            >
-              Save copy
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }
-
