@@ -60,8 +60,7 @@ export function CampaignsView({ openSignal = 0 }: { openSignal?: number }) {
               Delete campaign
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+        </AlertDialogContent>
       </AlertDialog>
     </>
   );
