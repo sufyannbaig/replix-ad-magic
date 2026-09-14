@@ -766,15 +766,16 @@ function ProductUrlPanel({
 }) {
   const [url, setUrl] = useState(initialUrl);
   const [busy, setBusy] = useState(false);
+  const autoRanRef = useRef(false);
 
-  const analyze = async () => {
-    if (!url.trim()) {
+  const analyze = async (value = url) => {
+    if (!value.trim()) {
       toast.error("Enter a product URL first.");
       return;
     }
     setBusy(true);
     try {
-      const resolved = await resolveProductUrl({ data: { url: url.trim() } });
+      const resolved = await resolveProductUrl({ data: { url: value.trim() } });
       // Re-encode to a compact JPEG so store formats the models reject (AVIF, huge
       // PNGs) still work exactly like an upload.
       const dataUrl = await urlToDataUrl(resolved.dataUrl);
@@ -793,6 +794,16 @@ function ProductUrlPanel({
       setBusy(false);
     }
   };
+
+  // Arriving from the dashboard with a URL: prefill it and run the analysis
+  // automatically, so this path lands on the inner page like the other sources.
+  useEffect(() => {
+    if (!initialUrl || autoRanRef.current) return;
+    autoRanRef.current = true;
+    setUrl(initialUrl);
+    void analyze(initialUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialUrl]);
 
   return (
     <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-16 text-center">
