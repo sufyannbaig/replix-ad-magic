@@ -768,11 +768,14 @@ function ProductUrlPanel({ onReady }: { onReady: (subject: Subject) => void }) {
     setBusy(true);
     try {
       const resolved = await resolveProductUrl({ data: { url: url.trim() } });
+      // Re-encode to a compact JPEG so store formats the models reject (AVIF, huge
+      // PNGs) still work exactly like an upload.
+      const dataUrl = await urlToDataUrl(resolved.dataUrl);
       onReady({
         id: `url-${Date.now()}`,
         name: resolved.name,
-        displayImage: resolved.imageUrl,
-        dataUrl: resolved.dataUrl,
+        displayImage: dataUrl,
+        dataUrl,
         source: "url",
       });
     } catch (error) {
