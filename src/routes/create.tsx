@@ -344,8 +344,8 @@ function ProductPanel({
   );
 
   return (
-    <div className="rounded-2xl bg-muted/60 p-5">
-      <div className="card-soft p-5">
+    <div className="card-soft p-5">
+      <div>
         <div className="flex flex-col gap-6 sm:flex-row">
           {thumb}
 
@@ -540,8 +540,8 @@ function ThemePicker({
   const preview = chosen.length ? chosen : themes.slice(0, 3);
 
   return (
-    <div className="rounded-2xl bg-muted/60 p-5">
-      <div className="card-soft flex flex-col items-center gap-4 p-5 text-center">
+    <div>
+      <div className="card-soft flex flex-col items-center gap-4 p-6 text-center">
         <div className="flex h-28 items-center justify-center pt-2">
           {preview.map((t, i) => (
             <img
@@ -562,9 +562,7 @@ function ThemePicker({
           ))}
         </div>
 
-        <p className="text-sm font-semibold text-navy underline decoration-navy/40 underline-offset-4">
-          Select Creative Theme
-        </p>
+        <p className="text-base font-semibold text-foreground">Select Creative Theme</p>
 
         {chosen.length ? (
           <div className="flex flex-wrap justify-center gap-2">
@@ -587,10 +585,10 @@ function ThemePicker({
 
         <div className="flex w-full flex-col gap-2">
           <Button
-            className="w-full bg-navy text-navy-foreground hover:bg-navy-soft"
+            className="w-full rounded-full bg-navy text-navy-foreground hover:bg-navy-soft"
             onClick={() => setOpen(true)}
           >
-            <LayoutGrid className="mr-1 h-4 w-4" /> Select Theme
+            <LayoutGrid className="mr-1 h-4 w-4" /> Select Creative Theme
           </Button>
           {chosen.length ? (
             <Button variant="ghost" size="sm" onClick={onClear}>
@@ -1149,16 +1147,9 @@ function CreateAd() {
 
         {step === 2 && subject ? (
           <section className="space-y-6">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Select a product from your store inventory to begin.
-              </p>
-              <h2 className="font-display text-2xl font-semibold">Create a new ad</h2>
-            </div>
-
             <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_auto_minmax(280px,1fr)]">
               <div className="space-y-3">
-                <h3 className="font-display text-lg font-semibold">Product</h3>
+                <h3 className="text-xl font-medium text-foreground">Product</h3>
                 <ProductPanel
                   subject={subject}
                   analysis={analysis}
@@ -1176,7 +1167,7 @@ function CreateAd() {
 
               <div className="space-y-3">
                 <div className="flex items-baseline justify-between">
-                  <h3 className="font-display text-lg font-semibold">Creative Themes</h3>
+                  <h3 className="text-xl font-medium text-foreground">Creative Themes</h3>
                   <span className="text-xs text-muted-foreground">
                     {themeIds.length} of 3 chosen
                   </span>
@@ -1193,9 +1184,7 @@ function CreateAd() {
             <div className="card-soft flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                    Format
-                  </span>
+                  <span className="text-sm font-medium text-foreground">Format:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {formats.map((f) => (
                       <button
@@ -1215,9 +1204,7 @@ function CreateAd() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs tracking-[0.14em] text-muted-foreground uppercase">
-                    Concepts
-                  </span>
+                  <span className="text-sm font-medium text-foreground">Concepts:</span>
                   <div className="flex gap-1.5">
                     {[3, 5, 10].map((n) => (
                       <button
@@ -1239,12 +1226,13 @@ function CreateAd() {
 
               <Button
                 size="lg"
-                className="bg-navy text-navy-foreground hover:bg-navy-soft"
+                variant="gradient"
+                className="rounded-full px-7"
                 disabled={generating || !analysis || themeIds.length === 0}
                 onClick={() => void runGeneration(batch)}
               >
                 <Sparkles className="mr-1 h-4 w-4" />
-                {generating ? "Generating…" : "Generate Ad"}
+                {generating ? "Generating…" : "Generate Ads"}
               </Button>
             </div>
 
@@ -1335,12 +1323,9 @@ function RecentGenerations() {
     <section className="space-y-4 pt-2">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 className="font-display text-xl font-semibold">Recent Ads Generations</h3>
-          <p className="text-sm text-muted-foreground">
-            The most recent results generated through the app.
-          </p>
+          <h3 className="text-xl font-medium text-foreground">Recent Generated Ads</h3>
         </div>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" className="rounded-full px-5" asChild>
           <Link to="/gallery">View All</Link>
         </Button>
       </div>
