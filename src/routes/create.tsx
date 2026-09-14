@@ -1169,7 +1169,7 @@ function CreateAd() {
             ) : mode === "upload" ? (
               <UploadPanel onReady={startUpload} />
             ) : (
-              <ProductUrlPanel onReady={startUpload} />
+              <ProductUrlPanel onReady={startUpload} initialUrl={intakeUrl} />
             )}
           </section>
         ) : null}
