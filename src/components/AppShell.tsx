@@ -62,7 +62,11 @@ function CreditsPill() {
   const { creditsRemaining, creditsTotal } = useStudio();
 
   return (
-    <div className="flex shrink-0 items-center gap-2 rounded-full border border-gold/60 bg-gold-soft/60 px-3 py-1.5 text-navy">
+    <Link
+      to="/pricing"
+      aria-label={`View pricing and billing. ${creditsRemaining} of ${creditsTotal} credits remaining`}
+      className="flex shrink-0 items-center gap-2 rounded-full border border-gold/60 bg-gold-soft/60 px-3 py-1.5 text-navy transition-colors hover:bg-gold-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       <img src={creditCoin} alt="" className="h-5 w-5" />
       <span className="text-sm font-bold tabular-nums">
         {creditsRemaining}/{creditsTotal}
@@ -70,7 +74,7 @@ function CreditsPill() {
       <span className="rounded-full bg-card px-2 py-0.5 text-[0.65rem] font-semibold text-muted-foreground">
         FREE
       </span>
-    </div>
+    </Link>
   );
 }
 

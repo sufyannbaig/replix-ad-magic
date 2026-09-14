@@ -12,12 +12,12 @@ import {
   Lightbulb,
   Plus,
   Upload,
-  Store,
   AlertTriangle,
   ImagePlus,
   Pencil,
   LayoutGrid,
   Link2,
+  Package,
   X,
 } from "lucide-react";
 
@@ -1060,40 +1060,52 @@ function CreateAd() {
   return (
     <AppShell
       title={step === 1 ? "Generate Ads that stop the scroll. In seconds." : "Generate Ad"}
+      titleGradient={step === 1}
       {...(step === 1 ? {} : { subtitle: "From product to ready-to-run creatives in seconds." })}
     >
       <div className="space-y-7">
         {step === 1 ? (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="font-display text-xl font-medium">Pick a product</h2>
-                <p className="text-sm text-muted-foreground">
-                  Pulled live from your store, ranked by best seller — or start from any photo.
-                </p>
-              </div>
-              <div className="flex gap-1 rounded-full border border-border bg-card p-1">
+          <section className="space-y-8">
+            <div className="flex justify-center">
+              <div
+                className="grid w-full max-w-[540px] grid-cols-3 rounded-full border border-border bg-card p-1 shadow-soft"
+                role="tablist"
+                aria-label="Choose product source"
+              >
                 {(
                   [
-                    { id: "product", label: "Shopify Product", icon: Store },
+                    { id: "product", label: "Shopify Product", icon: Package },
                     { id: "upload", label: "Upload Image", icon: Upload },
                     { id: "url", label: "Product URL", icon: Link2 },
                   ] as const
                 ).map(({ id, label, icon: Icon }) => (
-                  <button
+                  <Button
                     key={id}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    role="tab"
+                    aria-selected={mode === id}
                     onClick={() => setMode(id)}
                     className={cn(
-                      "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
+                      "h-10 min-w-0 gap-2 rounded-full px-2 text-xs font-medium transition-all sm:px-4 sm:text-sm",
                       mode === id
-                        ? "bg-gold-soft text-navy"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "bg-navy text-navy-foreground shadow-soft hover:bg-navy-soft hover:text-navy-foreground"
+                        : "text-foreground hover:bg-muted",
                     )}
                   >
-                    <Icon className="h-3.5 w-3.5" /> {label}
-                  </button>
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{label}</span>
+                  </Button>
                 ))}
               </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-medium text-foreground">Choose Any Product</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Select your Shopify product and generate ads.
+              </p>
             </div>
 
             {mode === "product" ? (
