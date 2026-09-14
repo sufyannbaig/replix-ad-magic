@@ -178,9 +178,9 @@ export function AdCard({
         ) : null}
       </div>
 
-      <div className="space-y-3 p-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="text-[0.65rem] font-medium">
+      <div className="card-soft space-y-3 rounded-2xl p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <Badge variant="outline" className="rounded-full px-3 py-1 text-[0.65rem] font-medium">
             {themeLabel(ad.theme)}
           </Badge>
           <span className="text-[0.7rem] text-muted-foreground">{ad.productName}</span>
