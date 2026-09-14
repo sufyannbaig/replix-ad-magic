@@ -273,10 +273,20 @@ export type Ad = {
   collectionIds: string[];
 };
 
+export type CollectionColor = "gray" | "yellow" | "pink" | "teal";
+
+export const collectionColors: { id: CollectionColor; label: string; swatch: string }[] = [
+  { id: "gray", label: "Grey", swatch: "#D5D6D8" },
+  { id: "yellow", label: "Yellow", swatch: "#F8DC94" },
+  { id: "pink", label: "Pink", swatch: "#F7CDEC" },
+  { id: "teal", label: "Teal", swatch: "#A7E4CF" },
+];
+
 export type Collection = {
   id: string;
   name: string;
   description: string;
+  color: CollectionColor;
 };
 
 export const collections: Collection[] = [
@@ -284,11 +294,13 @@ export const collections: Collection[] = [
     id: "summer-iced-push",
     name: "Summer Iced Push",
     description: "Warm-weather creatives leading with the 15-second pour",
+    color: "gray",
   },
   {
     id: "proof-that-converts",
     name: "Proof That Converts",
     description: "Review-led and stats-led ads for cold traffic",
+    color: "yellow",
   },
 ];
 
