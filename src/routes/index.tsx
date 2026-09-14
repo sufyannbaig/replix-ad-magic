@@ -12,6 +12,7 @@ import { setProductIntake } from "@/lib/product-intake";
 import { useStudio } from "@/lib/studio-store";
 import creditCoin from "@/assets/redesign/credit-coin.png";
 import shopifyMark from "@/assets/shopify-mark.png.asset.json";
+import replixMark from "@/assets/replix-mark.png.asset.json";
 import productUrlIcon from "@/assets/product-url-icon.png.asset.json";
 
 export const Route = createFileRoute("/")({
