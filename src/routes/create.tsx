@@ -5,9 +5,7 @@ import {
   ArrowRight,
   Check,
   ChevronRight,
-  Download,
   Loader2,
-  Share2,
   Sparkles,
   Lightbulb,
   Plus,
@@ -60,7 +58,7 @@ import {
   type ProductAnalysis,
 } from "@/lib/ai.functions";
 import { saveAd } from "@/lib/ads-repo";
-import { downloadImage, fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
+import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { takeProductIntake } from "@/lib/product-intake";
 import { cn } from "@/lib/utils";
