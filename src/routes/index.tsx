@@ -11,6 +11,8 @@ import { fileToDataUrl } from "@/lib/image-utils";
 import { setProductIntake } from "@/lib/product-intake";
 import { useStudio } from "@/lib/studio-store";
 import creditCoin from "@/assets/redesign/credit-coin.png";
+import shopifyMark from "@/assets/shopify-mark.png.asset.json";
+import replixMark from "@/assets/replix-mark.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -69,11 +71,21 @@ function Dashboard() {
             </div>
           </section>
         ) : (
-          <section className="overflow-hidden rounded-3xl bg-success px-6 py-10 text-center text-navy-foreground sm:px-12">
-            <Store className="mx-auto h-11 w-11" />
-            <h2 className="mt-4 font-display text-2xl font-semibold sm:text-3xl">Connect Your Shopify Store</h2>
-            <p className="mx-auto mt-3 max-w-lg text-sm text-navy-foreground/80">Sync your Shopify catalog and create studio-quality ads with optimized copy in under 60 seconds.</p>
-            <Button className="mt-6 rounded-full bg-card px-6 text-navy hover:bg-card/90" onClick={() => setConnected(true)}><Link2 /> Connect Store</Button>
+          <section className="relative overflow-hidden rounded-3xl bg-shopify-green px-6 py-12 text-center text-navy-foreground sm:px-12">
+            {/* glassy decorative circles */}
+            <span className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/15 backdrop-blur-sm" />
+            <span className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-white/10 backdrop-blur-sm" />
+            <span className="pointer-events-none absolute -bottom-16 right-1/3 h-40 w-40 rounded-full bg-white/10 backdrop-blur-sm" />
+            <img src={shopifyMark.url} alt="" className="pointer-events-none absolute left-5 top-1/2 hidden h-16 w-16 -translate-y-1/2 -rotate-6 rounded-2xl bg-card p-1 shadow-lift lg:block" />
+            <img src={replixMark.url} alt="" className="pointer-events-none absolute right-6 top-[62%] hidden h-16 w-16 rotate-6 rounded-2xl shadow-lift lg:block" />
+            <div className="relative">
+              <Store className="mx-auto h-10 w-10" />
+              <h2 className="mt-4 text-2xl font-medium sm:text-3xl">
+                Connect Your <span className="font-bold italic">Shopify</span> Store
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-sm text-navy-foreground/85">Sync your Shopify catalog and create studio-quality ads with optimized copy in under 60 seconds.</p>
+              <Button className="mt-6 rounded-full bg-card px-6 text-navy hover:bg-card/90" onClick={() => setConnected(true)}><Link2 /> Connect Store</Button>
+            </div>
           </section>
         )}
 
