@@ -28,6 +28,10 @@ type StudioState = {
   updateAd: (id: string, patch: Partial<Ad>) => void;
   toggleFavorite: (id: string) => void;
   addToCollection: (adId: string, collectionId: string) => void;
+  addCollection: (input: Omit<Collection, "id">) => string;
+  updateCollection: (id: string, patch: Partial<Omit<Collection, "id">>) => void;
+  removeCollection: (id: string) => void;
+  setCollectionAds: (collectionId: string, adIds: string[]) => void;
   spendCredits: (n: number) => void;
 };
 
