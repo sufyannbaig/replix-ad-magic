@@ -51,7 +51,7 @@ export function ProductCardBody({
 }
 
 export const productCardFrame =
-  "group block overflow-hidden rounded-2xl bg-card text-left shadow-soft transition-shadow hover:shadow-lift";
+  "group block overflow-hidden rounded-2xl bg-[#F2F2F3] text-left shadow-soft transition-shadow hover:shadow-lift";
 
 export function productCardClasses(selected?: boolean, className?: string) {
   return cn(productCardFrame, selected && "ring-2 ring-primary", className);
