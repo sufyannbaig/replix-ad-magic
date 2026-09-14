@@ -19,7 +19,7 @@ function Collections() {
       subtitle="Grouped creatives you can reuse campaign to campaign"
       action={
         <Button variant="navy" className="hidden rounded-full px-7 sm:inline-flex" onClick={() => setOpenSignal((n) => n + 1)}>
-          <Plus /> Create Your First Campaign
+          <Plus /> Create New Campaign
         </Button>
       }
     >
