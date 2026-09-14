@@ -62,6 +62,7 @@ import { fileToDataUrl, urlToDataUrl } from "@/lib/image-utils";
 import { useStudio } from "@/lib/studio-store";
 import { takeProductIntake } from "@/lib/product-intake";
 import { cn } from "@/lib/utils";
+import productUrlIcon from "@/assets/product-url-icon.png.asset.json";
 import themeBeforeAfter from "@/assets/theme-before-after.jpg";
 import themeBoldClaim from "@/assets/theme-bold-claim.jpg";
 import themeFeatureBenefit from "@/assets/theme-feature-benefit.jpg";
@@ -765,15 +766,16 @@ function ProductUrlPanel({
 }) {
   const [url, setUrl] = useState(initialUrl);
   const [busy, setBusy] = useState(false);
+  const autoRanRef = useRef(false);
 
-  const analyze = async () => {
-    if (!url.trim()) {
+  const analyze = async (value = url) => {
+    if (!value.trim()) {
       toast.error("Enter a product URL first.");
       return;
     }
     setBusy(true);
     try {
-      const resolved = await resolveProductUrl({ data: { url: url.trim() } });
+      const resolved = await resolveProductUrl({ data: { url: value.trim() } });
       // Re-encode to a compact JPEG so store formats the models reject (AVIF, huge
       // PNGs) still work exactly like an upload.
       const dataUrl = await urlToDataUrl(resolved.dataUrl);
@@ -793,11 +795,19 @@ function ProductUrlPanel({
     }
   };
 
+  // Arriving from the dashboard with a URL: prefill it and run the analysis
+  // automatically, so this path lands on the inner page like the other sources.
+  useEffect(() => {
+    if (!initialUrl || autoRanRef.current) return;
+    autoRanRef.current = true;
+    setUrl(initialUrl);
+    void analyze(initialUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialUrl]);
+
   return (
     <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-16 text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy text-gold">
-        <Link2 className="h-6 w-6" />
-      </span>
+      <img src={productUrlIcon.url} alt="Product URL" className="h-16 w-16 rounded-2xl object-contain" />
       <h3 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h3>
       <p className="mt-2 text-sm text-muted-foreground">
         Paste a public product page and we’ll use its primary image.
