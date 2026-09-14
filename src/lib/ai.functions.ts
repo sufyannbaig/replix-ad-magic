@@ -136,14 +136,43 @@ export const resolveProductUrl = createServerFn({ method: "POST" })
       "accept-language": "en-US,en;q=0.9",
     };
 
-    const page = await fetch(pageUrl, { headers: browserHeaders, redirect: "follow" }).catch(() => null);
-    if (!page || !page.ok) {
+    // Some stores block server-side requests (403/429/503). Try the direct fetch first,
+    // then a public read-only text proxy that renders the page for us.
+    let html = "";
+    let resolvedUrl = pageUrl.toString();
+
+    const direct = await fetch(pageUrl, { headers: browserHeaders, redirect: "follow" }).catch(() => null);
+    if (direct?.ok) {
+      html = await direct.text();
+      resolvedUrl = direct.url || resolvedUrl;
+    } else {
+      const proxied = await fetch(`https://r.jina.ai/${pageUrl.toString()}`, {
+        headers: { ...browserHeaders, "x-respond-with": "html" },
+        redirect: "follow",
+      }).catch(() => null);
+      if (proxied?.ok) html = await proxied.text();
+    }
+
+    if (!html) {
+      // Last resort: the pasted link may itself be a direct image.
+      const asImage = await fetch(pageUrl, {
+        headers: { ...browserHeaders, accept: "image/*,*/*;q=0.8" },
+        redirect: "follow",
+      }).catch(() => null);
+      const directType = (asImage?.headers.get("content-type") ?? "").split(";")[0]!.trim();
+      if (asImage?.ok && directType.startsWith("image/")) {
+        const bytes = new Uint8Array(await asImage.arrayBuffer());
+        return {
+          name: pageUrl.hostname,
+          imageUrl: pageUrl.toString(),
+          dataUrl: `data:${directType};base64,${Buffer.from(bytes).toString("base64")}`,
+        };
+      }
       throw new Error(
         "We could not open that product page. Check the link is public, or upload the image instead.",
       );
     }
-    const html = await page.text();
-    const finalUrl = new URL(page.url || pageUrl.toString());
+    const finalUrl = new URL(resolvedUrl);
 
     const titleMatch =
       html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) ??
