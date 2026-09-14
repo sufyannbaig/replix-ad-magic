@@ -852,6 +852,7 @@ function CreateAd() {
   const [mode, setMode] = useState<"product" | "upload" | "url">(wizardCache.mode);
   const [subject, setSubject] = useState<Subject | null>(wizardCache.subject);
   const [preparing, setPreparing] = useState<string | null>(null);
+  const [intakeUrl, setIntakeUrl] = useState("");
   const [analysis, setAnalysis] = useState<ProductAnalysis | null>(wizardCache.analysis);
   const [themeIds, setThemeIds] = useState<ThemeId[]>(wizardCache.themeIds);
   const [format, setFormat] = useState<AdFormat>(wizardCache.format);
@@ -897,6 +898,7 @@ function CreateAd() {
       return;
     }
     setMode("url");
+    setIntakeUrl(intake.url);
   }, []);
 
   const pickProduct = async (id: string) => {
