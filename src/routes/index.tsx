@@ -77,10 +77,15 @@ function Dashboard() {
             <span className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/15 backdrop-blur-sm" />
             <span className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-white/10 backdrop-blur-sm" />
             <span className="pointer-events-none absolute -bottom-16 right-1/3 h-40 w-40 rounded-full bg-white/10 backdrop-blur-sm" />
-            <img src={shopifyMark.url} alt="" className="pointer-events-none absolute left-5 top-1/2 hidden h-16 w-16 -translate-y-1/2 -rotate-6 rounded-2xl bg-card p-1 shadow-lift lg:block" />
-            <img src={replixMark.url} alt="" className="pointer-events-none absolute right-6 top-[62%] hidden h-16 w-16 rotate-6 rounded-2xl shadow-lift lg:block" />
-            <div className="relative">
-              <Store className="mx-auto h-10 w-10" />
+            <div className="relative mx-auto flex w-fit items-center gap-3 sm:gap-4">
+              <img src={shopifyMark.url} alt="Shopify" className="h-16 w-16 -rotate-6 rounded-2xl shadow-lift sm:h-20 sm:w-20" />
+              <span className="flex items-center gap-1.5">
+                <span className="h-px w-6 bg-white/70 sm:w-10" />
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/25 shadow-lift backdrop-blur-sm"><Link2 className="h-4 w-4" /></span>
+                <span className="h-px w-6 bg-white/70 sm:w-10" />
+              </span>
+              <img src={replixMark.url} alt="Replix AI" className="h-16 w-16 rotate-6 rounded-2xl shadow-lift sm:h-20 sm:w-20" />
+            </div>
               <h2 className="mt-4 text-2xl font-medium sm:text-3xl">
                 Connect Your <span className="font-bold italic">Shopify</span> Store
               </h2>
