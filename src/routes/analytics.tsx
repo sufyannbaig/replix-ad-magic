@@ -15,10 +15,10 @@ export const Route = createFileRoute("/analytics")({ head: () => ({ meta: [
 
 function Analytics() {
   const { ads, creditsRemaining, creditsTotal, creditsUsed } = useStudio();
-  return <AppShell title="Analytics" subtitle="Grouped creatives you can reuse campaign to campaign">
+  return <AppShell title="Analytics" subtitle="Track your credit usage, plan, and ad performance in one place.">
     <div className="space-y-5">
       <div className="grid gap-5 lg:grid-cols-2">
-        <section className="flex items-center justify-between rounded-3xl border border-gold/60 bg-gold-soft/50 p-7"><div><p className="text-base">Credit Usage:</p><p className="mt-2 font-display text-3xl font-bold">{creditsRemaining}/{creditsTotal}</p><p className="mt-1 text-xs text-muted-foreground">free ads remaining | 1 credit per ad</p><Progress value={(creditsRemaining / creditsTotal) * 100} className="mt-8 w-64 max-w-full" /></div><img src={creditCoin} alt="Credit balance" className="hidden h-28 w-28 sm:block" /></section>
+        <section className="flex items-center justify-between rounded-3xl border border-gold/60 bg-gold-soft/50 p-7"><div><p className="text-base">Credit Usage:</p><p className="mt-2 font-display text-3xl font-bold">{creditsUsed}/{creditsTotal}</p><p className="mt-1 text-xs text-muted-foreground">credits used | {creditsRemaining} free ads remaining</p><Progress value={(creditsUsed / creditsTotal) * 100} className="mt-8 w-64 max-w-full" /></div><img src={creditCoin} alt="Credit balance" className="hidden h-28 w-28 sm:block" /></section>
         <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-bright to-navy p-7 text-navy-foreground"><span className="absolute -right-16 -bottom-24 h-52 w-52 rounded-full border border-navy-foreground/15" /><span className="absolute -top-24 right-24 h-48 w-48 rounded-full border border-navy-foreground/10" /><Button asChild className="absolute top-7 right-7 rounded-full bg-card text-navy hover:bg-card/90"><Link to="/pricing">Upgrade Plan</Link></Button><p className="text-base text-navy-foreground/70">Current Plan</p><p className="mt-2 font-display text-3xl font-bold uppercase">{user.plan}</p><p className="mt-2 text-xs text-navy-foreground/60">100 free ads promo</p></section>
       </div>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
