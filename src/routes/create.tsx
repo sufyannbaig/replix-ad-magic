@@ -979,14 +979,17 @@ function CreateAd() {
   );
 
   const runGeneration = async (count: number) => {
-    if (!subject || !analysis) {
-      setStep(subject ? 2 : 1);
-      toast.error("Pick a product or photo first so we have something to study.");
+    if (!subject) {
+      setStep(1);
+      toast.error("Choose a product, upload a photo, or paste a product URL first.");
+      return;
+    }
+    if (!analysis) {
+      toast.error("We are still reading your product details — try again in a moment.");
       return;
     }
     if (themeIds.length === 0) {
-      setStep(3);
-      toast.error("Choose at least one creative theme.");
+      toast.error("Pick at least one creative theme (up to 3) before generating.");
       return;
     }
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
@@ -1223,6 +1226,32 @@ function CreateAd() {
               </div>
             </div>
 
+            {/* Plain-language checklist so nobody gets stuck wondering what is missing */}
+            {(() => {
+              const todo: string[] = [];
+              if (!subject) todo.push("Choose a product, upload a photo, or paste a product URL.");
+              else if (!analysis)
+                todo.push("Wait a moment while we finish reading your product details.");
+              if (themeIds.length === 0)
+                todo.push("Pick at least one creative theme (up to 3).");
+              if (!todo.length) return null;
+              return (
+                <div className="rounded-xl border border-primary/40 bg-gold-soft/50 p-4">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-navy">
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    Finish these to generate your ads
+                  </p>
+                  <ul className="mt-2 space-y-1 pl-6 text-sm text-navy/80">
+                    {todo.map((item) => (
+                      <li key={item} className="list-disc">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
             {/* One combined toolbar: format, batch size, generate */}
             <div className="card-soft flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -1271,7 +1300,7 @@ function CreateAd() {
                 size="lg"
                 variant="gradient"
                 className="rounded-full px-7"
-                disabled={generating || !analysis || themeIds.length === 0}
+                disabled={generating}
                 onClick={() => void runGeneration(batch)}
               >
                 <Sparkles className="mr-1 h-4 w-4" />
