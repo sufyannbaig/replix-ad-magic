@@ -11,3 +11,7 @@
 - [x] Stage 8: Help and final cross-route verification
 - [x] Match the Create page source switcher and product layout to the supplied reference
 - [x] Make the global credits pill navigate to Pricing & Billing
+- [ ] Audit the uploaded client live-project codebase and map its production capabilities
+- [ ] Tailor the AI generation handoff ZIP to the client live project
+- [ ] Tailor the approved UI handoff ZIP to the client live project
+- [ ] Validate and deliver both ZIPs with client installation prompts and handoff instructions
