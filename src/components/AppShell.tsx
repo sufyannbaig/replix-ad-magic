@@ -80,17 +80,19 @@ export function AppShell({
   title,
   subtitle,
   action,
+  titleGradient = false,
   children,
 }: {
   title: string;
   subtitle?: string;
   action?: ReactNode;
+  titleGradient?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="min-h-screen w-full bg-background">
+    <div className="dot-canvas min-h-screen w-full">
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex h-[76px] max-w-[1240px] items-center justify-between gap-5 px-5 sm:px-8 lg:h-[88px] lg:px-10">
           <Brand />
