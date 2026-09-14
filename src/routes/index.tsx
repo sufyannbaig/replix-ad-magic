@@ -44,7 +44,7 @@ function Dashboard() {
   };
 
   return (
-    <AppShell title="Generate Ads that stop the scroll. In seconds.">
+    <AppShell title="Generate AI Ads that stop the scroll. In seconds." titleGradient>
       <div className="space-y-9">
         {connected ? (
           <section>
