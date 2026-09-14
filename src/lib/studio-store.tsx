@@ -52,20 +52,32 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   // Pull every real generated ad out of the database on first load.
   useEffect(() => {
     let active = true;
-    void fetchStoredAds()
-      .then((stored) => {
-        if (!active || !stored.length) return;
-        setAds((prev) => {
-          const known = new Set(prev.map((a) => a.id));
-          const fresh = stored.filter((a) => !known.has(a.id));
-          return [...fresh, ...prev];
+    const load = (attempt = 0): void => {
+      void fetchStoredAds()
+        .then((stored) => {
+          if (!active || !stored.length) return;
+          setAds((prev) => {
+            const known = new Set(prev.map((a) => a.id));
+            const fresh = stored.filter((a) => !known.has(a.id));
+            return [...fresh, ...prev];
+          });
+        })
+        .catch((error) => {
+          if (!active) return;
+          // A page navigation can abort the in-flight request; retry once quietly.
+          if (attempt === 0) {
+            setTimeout(() => active && load(attempt + 1), 800);
+            return;
+          }
+          console.warn("[studio] could not load saved ads", error);
         });
-      })
-      .catch((error) => console.error("[studio] could not load saved ads", error));
+    };
+    load();
     return () => {
       active = false;
     };
   }, []);
+
 
   const addAds = useCallback((next: Ad[]) => setAds((prev) => [...next, ...prev]), []);
 
