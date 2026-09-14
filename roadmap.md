@@ -9,5 +9,5 @@
 - [x] Stage 6: Analytics
 - [x] Stage 7: Pricing & Billing
 - [x] Stage 8: Help and final cross-route verification
-- [ ] Match the Create page source switcher and product layout to the supplied reference
-- [ ] Make the global credits pill navigate to Pricing & Billing
+- [x] Match the Create page source switcher and product layout to the supplied reference
+- [x] Make the global credits pill navigate to Pricing & Billing
