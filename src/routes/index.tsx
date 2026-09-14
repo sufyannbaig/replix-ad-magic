@@ -74,10 +74,10 @@ function Dashboard() {
         ) : (
           <section className="relative overflow-hidden rounded-3xl bg-shopify-green px-6 py-12 text-center text-navy-foreground sm:px-12">
             {/* glassy decorative circles */}
-            <span className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/15 backdrop-blur-sm" />
-            <span className="pointer-events-none absolute -bottom-24 -left-10 h-56 w-56 rounded-full bg-white/10 backdrop-blur-sm" />
-            <span className="pointer-events-none absolute -bottom-16 right-1/3 h-40 w-40 rounded-full bg-white/10 backdrop-blur-sm" />
-            <div className="relative mx-auto flex w-fit items-center gap-3 sm:gap-4">
+            <span className="pointer-events-none absolute -right-16 -top-20 z-0 h-64 w-64 rounded-full bg-white/15 backdrop-blur-sm" />
+            <span className="pointer-events-none absolute -bottom-24 -left-10 z-0 h-56 w-56 rounded-full bg-white/10 backdrop-blur-sm" />
+            <span className="pointer-events-none absolute -bottom-16 right-1/3 z-0 h-40 w-40 rounded-full bg-white/10 backdrop-blur-sm" />
+            <div className="relative z-10 mx-auto flex w-fit items-center gap-3 sm:gap-4">
               <img src={shopifyMark.url} alt="Shopify" className="h-16 w-16 -rotate-6 rounded-2xl shadow-lift sm:h-20 sm:w-20" />
               <span className="flex items-center gap-1.5">
                 <span className="h-px w-6 bg-white/70 sm:w-10" />
@@ -86,7 +86,7 @@ function Dashboard() {
               </span>
               <img src={replixMark.url} alt="Replix AI" className="h-16 w-16 rotate-6 rounded-2xl shadow-lift sm:h-20 sm:w-20" />
             </div>
-            <div className="relative">
+            <div className="relative z-10">
               <h2 className="mt-5 text-2xl font-medium sm:text-3xl">
                 Connect Your <span className="font-bold italic">Shopify</span> Store
               </h2>
