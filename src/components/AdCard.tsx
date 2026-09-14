@@ -129,7 +129,7 @@ export function AdCard({
 
   return (
     <article className="group space-y-3">
-      <div className="relative overflow-hidden rounded-2xl border-2 border-navy-bright/60 bg-card shadow-soft">
+      <div className="relative overflow-hidden rounded-2xl bg-card shadow-soft">
         {ad.image ? (
           <img
             src={ad.image}

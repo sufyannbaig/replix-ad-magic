@@ -13,6 +13,7 @@ import { useStudio } from "@/lib/studio-store";
 import creditCoin from "@/assets/redesign/credit-coin.png";
 import shopifyMark from "@/assets/shopify-mark.png.asset.json";
 import replixMark from "@/assets/replix-mark.png.asset.json";
+import productUrlIcon from "@/assets/product-url-icon.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -100,7 +101,7 @@ function Dashboard() {
             <Button variant="outline" className="mt-6 rounded-full px-6" onClick={() => inputRef.current?.click()}><Upload /> Upload Image</Button>
           </div>
           <div className="flex flex-col items-center rounded-3xl border border-border bg-card px-8 py-10 text-center">
-            <img src={replixMark.url} alt="Replix" className="h-16 w-16 rounded-2xl object-contain" />
+            <img src={productUrlIcon.url} alt="Product URL" className="h-16 w-16 rounded-2xl object-contain" />
             <h2 className="mt-6 font-display text-xl font-semibold">Enter Your Product URL</h2>
             <div className="mt-6 flex w-full max-w-md rounded-full border border-input bg-background p-1.5 pl-4">
               <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://yourstore.com/products/..." className="h-9 flex-1 border-0 bg-transparent px-0 shadow-none" />
