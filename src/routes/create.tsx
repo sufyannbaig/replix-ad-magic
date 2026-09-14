@@ -979,14 +979,17 @@ function CreateAd() {
   );
 
   const runGeneration = async (count: number) => {
-    if (!subject || !analysis) {
-      setStep(subject ? 2 : 1);
-      toast.error("Pick a product or photo first so we have something to study.");
+    if (!subject) {
+      setStep(1);
+      toast.error("Choose a product, upload a photo, or paste a product URL first.");
+      return;
+    }
+    if (!analysis) {
+      toast.error("We are still reading your product details — try again in a moment.");
       return;
     }
     if (themeIds.length === 0) {
-      setStep(3);
-      toast.error("Choose at least one creative theme.");
+      toast.error("Pick at least one creative theme (up to 3) before generating.");
       return;
     }
     const chosenThemes = themes.filter((t) => themeIds.includes(t.id));
