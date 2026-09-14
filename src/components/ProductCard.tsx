@@ -14,9 +14,8 @@ type ProductCardProps = {
 };
 
 /**
- * Shared product layout card: soft grey frame around the product photo with a
- * navy rank pill, and a white detail card beneath. Used on the dashboard and in
- * the Create Ad product picker so every product looks identical.
+ * Shared product layout card: single white card, product photo filling the top
+ * with a navy rank pill, thin divider, then name / price / note beneath.
  */
 export function ProductCardBody({
   image,
@@ -27,8 +26,8 @@ export function ProductCardBody({
   imageOverlay,
 }: Omit<ProductCardProps, "selected" | "className">) {
   return (
-    <div className="p-2.5">
-      <div className="relative overflow-hidden rounded-2xl bg-muted">
+    <>
+      <div className="relative overflow-hidden bg-muted">
         <img
           src={image}
           alt={name}
@@ -36,23 +35,23 @@ export function ProductCardBody({
           className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
         />
         {badge ? (
-          <span className="absolute left-4 top-4 rounded-full bg-navy px-3.5 py-1.5 text-xs font-semibold text-navy-foreground shadow-soft">
+          <span className="absolute left-3 top-3 rounded-full bg-navy px-3 py-1 text-[0.7rem] font-semibold text-navy-foreground">
             {badge}
           </span>
         ) : null}
         {imageOverlay}
       </div>
-      <div className="mt-2.5 rounded-2xl bg-card px-5 py-5">
-        <p className="text-lg font-medium leading-snug text-foreground">{name}</p>
-        <p className="mt-2 text-lg font-medium text-foreground">${price.toFixed(2)}</p>
-        {note ? <p className="mt-2 text-sm text-muted-foreground">{note}</p> : null}
+      <div className="border-t border-border/70 px-4 py-4">
+        <p className="text-base font-medium leading-snug text-foreground">{name}</p>
+        <p className="mt-1.5 text-base font-medium text-foreground">${price.toFixed(2)}</p>
+        {note ? <p className="mt-1.5 text-[0.8rem] text-muted-foreground">{note}</p> : null}
       </div>
-    </div>
+    </>
   );
 }
 
 export const productCardFrame =
-  "group block overflow-hidden rounded-3xl bg-secondary/60 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift";
+  "group block overflow-hidden rounded-2xl bg-card text-left shadow-soft transition-shadow hover:shadow-lift";
 
 export function productCardClasses(selected?: boolean, className?: string) {
   return cn(productCardFrame, selected && "ring-2 ring-primary", className);
