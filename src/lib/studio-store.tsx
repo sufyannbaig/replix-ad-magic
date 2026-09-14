@@ -46,6 +46,7 @@ globalScope.__replixStudioContext = StudioContext;
 
 export function StudioProvider({ children }: { children: ReactNode }) {
   const [ads, setAds] = useState<Ad[]>(seededAds);
+  const [collections, setCollections] = useState<Collection[]>(seedCollections);
   const [creditsUsed, setCreditsUsed] = useState(seedCredits.used);
 
   // Pull every real generated ad out of the database on first load.
