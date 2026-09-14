@@ -1104,7 +1104,7 @@ function CreateAd() {
             <div>
               <h2 className="text-xl font-medium text-foreground">Choose Any Product</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Select your Shopify product and generate ads.
+                Select your Shopify product, upload image or paste product URL and generate ads.
               </p>
             </div>
 
