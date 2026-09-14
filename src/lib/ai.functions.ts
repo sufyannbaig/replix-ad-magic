@@ -151,14 +151,18 @@ export const resolveProductUrl = createServerFn({ method: "POST" })
 
     const candidates = imageCandidates(html);
     let lastReason = "";
+    // Logos and sprites are usually the first/smallest images on the page, so keep
+    // the heaviest usable candidate — that is nearly always the real product shot.
+    let best: { imageUrl: string; contentType: string; bytes: Uint8Array } | null = null;
 
-    for (const candidate of candidates.slice(0, 12)) {
+    for (const candidate of candidates.slice(0, 10)) {
       let imageUrl: string;
       try {
         imageUrl = new URL(candidate.startsWith("//") ? `${finalUrl.protocol}${candidate}` : candidate, finalUrl).toString();
       } catch {
         continue;
       }
+      if (/logo|sprite|icon|favicon|placeholder|badge|payment/i.test(imageUrl)) continue;
       const image = await fetch(imageUrl, {
         headers: { ...browserHeaders, referer: finalUrl.toString() },
         redirect: "follow",
@@ -178,14 +182,19 @@ export const resolveProductUrl = createServerFn({ method: "POST" })
         continue;
       }
       // Skip tiny sprites/tracking pixels that are not real product shots.
-      if (bytes.byteLength < 4 * 1024) {
+      if (bytes.byteLength < 6 * 1024) {
         lastReason = "tiny";
         continue;
       }
+      if (!best || bytes.byteLength > best.bytes.byteLength) best = { imageUrl, contentType, bytes };
+      if (best.bytes.byteLength > 250 * 1024) break;
+    }
+
+    if (best) {
       return {
         name: titleMatch?.[1] ? decodeEntities(titleMatch[1]) : finalUrl.hostname,
-        imageUrl,
-        dataUrl: `data:${contentType};base64,${Buffer.from(bytes).toString("base64")}`,
+        imageUrl: best.imageUrl,
+        dataUrl: `data:${best.contentType};base64,${Buffer.from(best.bytes).toString("base64")}`,
       };
     }
 
