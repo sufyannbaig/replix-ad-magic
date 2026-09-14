@@ -154,13 +154,18 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1,
+  /* Only the main page heading uses Archivo; everything else is Inter Tight. */
+  h1 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
   h2,
   h3,
   h4,
   .font-display {
-    font-family: var(--font-display);
-    letter-spacing: 0;
+    font-family: var(--font-sans);
+    letter-spacing: -0.005em;
   }
 }
 
