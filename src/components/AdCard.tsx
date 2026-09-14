@@ -128,8 +128,8 @@ export function AdCard({
   };
 
   return (
-    <article className="group card-soft overflow-hidden transition-shadow hover:shadow-lift">
-      <div className="relative">
+    <article className="group space-y-3">
+      <div className="relative overflow-hidden rounded-2xl border-2 border-navy-bright/60 bg-card shadow-soft">
         {ad.image ? (
           <img
             src={ad.image}
@@ -155,13 +155,11 @@ export function AdCard({
             <p className="text-xs text-muted-foreground">Painting the scene…</p>
           </div>
         )}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          <Badge className="bg-navy/85 text-[0.65rem] text-navy-foreground hover:bg-navy">
+        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
+          <Badge className="rounded-full bg-navy px-3 py-1 text-[0.65rem] font-semibold text-navy-foreground hover:bg-navy">
             {ad.platform === "instagram" ? "Instagram" : "Facebook"}
           </Badge>
-          <Badge variant="secondary" className="bg-card/90 text-[0.65rem]">
-            {ad.format}
-          </Badge>
+          <span className="text-[0.7rem] font-semibold text-card">{ad.format}</span>
         </div>
         <button
           onClick={() => toggleFavorite(ad.id)}
@@ -180,9 +178,9 @@ export function AdCard({
         ) : null}
       </div>
 
-      <div className="space-y-3 p-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="text-[0.65rem] font-medium">
+      <div className="card-soft space-y-3 rounded-2xl p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <Badge variant="outline" className="rounded-full px-3 py-1 text-[0.65rem] font-medium">
             {themeLabel(ad.theme)}
           </Badge>
           <span className="text-[0.7rem] text-muted-foreground">{ad.productName}</span>
