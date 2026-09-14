@@ -337,7 +337,7 @@ function ProductPanel({
         <Button
           size="sm"
           variant="outline"
-          className="rounded-full border-destructive px-4 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          className="rounded-full border-destructive bg-card px-4 text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={onDeleteProduct}
         >
           Delete
