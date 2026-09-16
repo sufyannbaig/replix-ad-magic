@@ -10,9 +10,12 @@ import {
 import {
   collections as seedCollections,
   credits as seedCredits,
+  findPaidPlan,
   seededAds,
+  user,
   type Ad,
   type Collection,
+  type PlanId,
 } from "@/data/studio";
 import { fetchStoredAds, patchStoredAd } from "@/lib/ads-repo";
 
