@@ -25,6 +25,11 @@ type StudioState = {
   creditsUsed: number;
   creditsTotal: number;
   creditsRemaining: number;
+  /** Display name of the plan shown as "Current Plan" across the app. */
+  planName: string;
+  /** Set once a paid plan is active, null while on the free plan. */
+  planId: PlanId | null;
+  setPlan: (planId: PlanId | null) => void;
   addAds: (ads: Ad[]) => void;
   replaceAd: (id: string, next: Ad) => void;
   removeAd: (id: string) => void;
