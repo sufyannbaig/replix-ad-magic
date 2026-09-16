@@ -10,9 +10,12 @@ import {
 import {
   collections as seedCollections,
   credits as seedCredits,
+  findPaidPlan,
   seededAds,
+  user,
   type Ad,
   type Collection,
+  type PlanId,
 } from "@/data/studio";
 import { fetchStoredAds, patchStoredAd } from "@/lib/ads-repo";
 
@@ -22,6 +25,11 @@ type StudioState = {
   creditsUsed: number;
   creditsTotal: number;
   creditsRemaining: number;
+  /** Display name of the plan shown as "Current Plan" across the app. */
+  planName: string;
+  /** Set once a paid plan is active, null while on the free plan. */
+  planId: PlanId | null;
+  setPlan: (planId: PlanId | null) => void;
   addAds: (ads: Ad[]) => void;
   replaceAd: (id: string, next: Ad) => void;
   removeAd: (id: string) => void;
@@ -48,6 +56,29 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [ads, setAds] = useState<Ad[]>(seededAds);
   const [collections, setCollections] = useState<Collection[]>(seedCollections);
   const [creditsUsed, setCreditsUsed] = useState(seedCredits.used);
+  const [planId, setPlanIdState] = useState<PlanId | null>(null);
+  const activePlan = planId ? findPaidPlan(planId) ?? null : null;
+
+  // Remember the demo's active plan across reloads, same session-only spirit
+  // as the rest of the prototype state.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("replix.plan");
+      if (saved && findPaidPlan(saved)) setPlanIdState(saved as PlanId);
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
+
+  const setPlan = useCallback((next: PlanId | null) => {
+    setPlanIdState(next);
+    try {
+      if (next) window.localStorage.setItem("replix.plan", next);
+      else window.localStorage.removeItem("replix.plan");
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
 
   // Pull every real generated ad out of the database on first load.
   useEffect(() => {
@@ -155,8 +186,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const creditsTotal = activePlan ? activePlan.credits : seedCredits.total;
+
   const spendCredits = useCallback(
-    (n: number) => setCreditsUsed((prev) => Math.min(seedCredits.total, prev + n)),
+    (n: number) => setCreditsUsed((prev) => prev + n),
     [],
   );
 
@@ -165,8 +198,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       ads,
       collections,
       creditsUsed,
-      creditsTotal: seedCredits.total,
-      creditsRemaining: seedCredits.total - creditsUsed,
+      creditsTotal,
+      creditsRemaining: Math.max(0, creditsTotal - creditsUsed),
+      planName: activePlan ? activePlan.name : user.plan,
+      planId: planId,
+      setPlan,
       addAds,
       replaceAd,
       removeAd,
@@ -183,6 +219,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       ads,
       collections,
       creditsUsed,
+      creditsTotal,
+      activePlan,
+      planId,
+      setPlan,
       addAds,
       replaceAd,
       removeAd,
