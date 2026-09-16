@@ -110,6 +110,66 @@ export const credits = {
   remaining: FREE_PLAN_TOTAL_ADS,
 };
 
+/**
+ * Single source of truth for paid plan names, prices and monthly limits.
+ * The Pricing page and the Stripe Checkout session both read from here so the
+ * charged amount can never drift from the displayed amount.
+ */
+export type PlanId = "starter" | "pro" | "scale";
+
+export type PaidPlan = {
+  id: PlanId;
+  name: string;
+  tagline: string;
+  /** Display price exactly as shown on the Pricing page. */
+  price: string;
+  /** Same amount in the smallest currency unit, used for Stripe. */
+  priceCents: number;
+  currency: "usd";
+  /** Monthly AI generations included. */
+  credits: number;
+  popular?: boolean;
+  features: string[];
+};
+
+export const paidPlans: PaidPlan[] = [
+  {
+    id: "starter",
+    name: "Starter",
+    tagline: "For small Shopify brands",
+    price: "$9.99",
+    priceCents: 999,
+    currency: "usd",
+    credits: 30,
+    features: ["30 AI generations/month", "All creative styles", "Edit captions & hooks", "Basic Brand DNA", "High-quality downloads"],
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    tagline: "For growing Shopify brands",
+    price: "$29",
+    priceCents: 2900,
+    currency: "usd",
+    credits: 100,
+    popular: true,
+    features: ["100 AI generations/month", "Advanced Brand DNA", "Multiple creative concepts", "Premium creative styles", "Full creative library"],
+  },
+  {
+    id: "scale",
+    name: "Scale",
+    tagline: "For brands creating ads at scale",
+    price: "$59",
+    priceCents: 5900,
+    currency: "usd",
+    credits: 300,
+    features: ["300 AI generations/month", "Advanced Brand DNA", "Multiple products", "Unlimited creative styles", "Priority support"],
+  },
+];
+
+export function findPaidPlan(id: string): PaidPlan | undefined {
+  return paidPlans.find((plan) => plan.id === id);
+}
+
 export const products: Product[] = [
   {
     id: "chocolate-raspberry-truffle",
