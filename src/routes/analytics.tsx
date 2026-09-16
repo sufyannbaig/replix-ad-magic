@@ -3,7 +3,7 @@ import { Users, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { user } from "@/data/studio";
+import { FREE_PLAN_TOTAL_ADS, user } from "@/data/studio";
 import { useStudio } from "@/lib/studio-store";
 import creditCoin from "@/assets/redesign/credit-coin.png";
 
@@ -19,7 +19,7 @@ function Analytics() {
     <div className="space-y-5">
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="flex items-center justify-between rounded-3xl border border-gold/60 bg-gold-soft/50 p-7"><div><p className="text-base">Credit Usage:</p><p className="mt-2 font-display text-3xl font-bold">{creditsUsed}/{creditsTotal}</p><p className="mt-1 text-xs text-muted-foreground">credits used | {creditsRemaining} free ads remaining</p><Progress value={(creditsUsed / creditsTotal) * 100} className="mt-8 w-64 max-w-full" /></div><img src={creditCoin} alt="Credit balance" className="hidden h-28 w-28 sm:block" /></section>
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-bright to-navy p-7 text-navy-foreground"><span className="absolute -right-16 -bottom-24 h-52 w-52 rounded-full border border-navy-foreground/15" /><span className="absolute -top-24 right-24 h-48 w-48 rounded-full border border-navy-foreground/10" /><Button asChild className="absolute top-7 right-7 rounded-full bg-card text-navy hover:bg-card/90"><Link to="/pricing">Upgrade Plan</Link></Button><p className="text-base text-navy-foreground/70">Current Plan</p><p className="mt-2 font-display text-3xl font-bold uppercase">{user.plan}</p><p className="mt-2 text-xs text-navy-foreground/60">100 free ads promo</p></section>
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-bright to-navy p-7 text-navy-foreground"><span className="absolute -right-16 -bottom-24 h-52 w-52 rounded-full border border-navy-foreground/15" /><span className="absolute -top-24 right-24 h-48 w-48 rounded-full border border-navy-foreground/10" /><Button asChild className="absolute top-7 right-7 rounded-full bg-card text-navy hover:bg-card/90"><Link to="/pricing">Upgrade Plan</Link></Button><p className="text-base text-navy-foreground/70">Current Plan</p><p className="mt-2 font-display text-3xl font-bold uppercase">{user.plan}</p><p className="mt-2 text-xs text-navy-foreground/60">{FREE_PLAN_TOTAL_ADS} free ads promo</p></section>
       </div>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Ads Generated:" value={String(ads.length)} note="Across your gallery" />
