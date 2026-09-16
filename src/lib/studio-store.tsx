@@ -155,8 +155,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const creditsTotal = activePlan ? activePlan.credits : seedCredits.total;
+
   const spendCredits = useCallback(
-    (n: number) => setCreditsUsed((prev) => Math.min(seedCredits.total, prev + n)),
+    (n: number) => setCreditsUsed((prev) => prev + n),
     [],
   );
 
@@ -165,8 +167,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       ads,
       collections,
       creditsUsed,
-      creditsTotal: seedCredits.total,
-      creditsRemaining: seedCredits.total - creditsUsed,
+      creditsTotal,
+      creditsRemaining: Math.max(0, creditsTotal - creditsUsed),
+      planName: activePlan ? activePlan.name : user.plan,
+      planId: planId,
+      setPlan,
       addAds,
       replaceAd,
       removeAd,
