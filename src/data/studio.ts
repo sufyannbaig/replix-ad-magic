@@ -101,7 +101,14 @@ export const user = {
   plan: "Free",
 };
 
-export const credits = { used: 0, total: 100, remaining: 100 };
+/** Free launch offer: ad generations granted to every new account. */
+export const FREE_PLAN_TOTAL_ADS = 10;
+
+export const credits = {
+  used: 0,
+  total: FREE_PLAN_TOTAL_ADS,
+  remaining: FREE_PLAN_TOTAL_ADS,
+};
 
 export const products: Product[] = [
   {
