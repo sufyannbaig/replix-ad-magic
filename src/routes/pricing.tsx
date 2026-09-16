@@ -1,11 +1,15 @@
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FREE_PLAN_TOTAL_ADS, store } from "@/data/studio";
+import { FREE_PLAN_TOTAL_ADS, paidPlans, store, type PlanId } from "@/data/studio";
 import { useStudio } from "@/lib/studio-store";
+import { confirmCheckoutSession, createCheckoutSession } from "@/lib/stripe.functions";
 
 export const Route = createFileRoute("/pricing")({ head: () => ({ meta: [
   { title: "Pricing — Replix AI Ad Studio" }, { name: "description", content: "Compare Replix AI plans for Shopify brands creating ads at every scale." },
