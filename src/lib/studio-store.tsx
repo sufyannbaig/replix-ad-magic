@@ -56,6 +56,29 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [ads, setAds] = useState<Ad[]>(seededAds);
   const [collections, setCollections] = useState<Collection[]>(seedCollections);
   const [creditsUsed, setCreditsUsed] = useState(seedCredits.used);
+  const [planId, setPlanIdState] = useState<PlanId | null>(null);
+  const activePlan = planId ? findPaidPlan(planId) ?? null : null;
+
+  // Remember the demo's active plan across reloads, same session-only spirit
+  // as the rest of the prototype state.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("replix.plan");
+      if (saved && findPaidPlan(saved)) setPlanIdState(saved as PlanId);
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
+
+  const setPlan = useCallback((next: PlanId | null) => {
+    setPlanIdState(next);
+    try {
+      if (next) window.localStorage.setItem("replix.plan", next);
+      else window.localStorage.removeItem("replix.plan");
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
 
   // Pull every real generated ad out of the database on first load.
   useEffect(() => {
