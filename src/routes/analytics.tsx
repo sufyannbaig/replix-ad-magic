@@ -14,7 +14,7 @@ export const Route = createFileRoute("/analytics")({ head: () => ({ meta: [
 ] }), component: Analytics });
 
 function Analytics() {
-  const { ads, creditsRemaining, creditsTotal, creditsUsed } = useStudio();
+  const { ads, creditsRemaining, creditsTotal, creditsUsed, planName } = useStudio();
   return <AppShell title="Analytics" subtitle="Track your credit usage, plan, and ad performance in one place.">
     <div className="space-y-5">
       <div className="grid gap-5 lg:grid-cols-2">
